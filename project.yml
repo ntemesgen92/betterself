@@ -1,0 +1,95 @@
+name: BetterSelf
+options:
+  bundleIdPrefix: com.betterself
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "15.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    DEVELOPMENT_TEAM: ""  # Set your team ID here
+
+targets:
+
+  BetterSelf:
+    type: application
+    platform: iOS
+    sources:
+      - path: BetterSelf
+    settings:
+      base:
+        INFOPLIST_FILE: BetterSelf/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.betterself.app
+        TARGETED_DEVICE_FAMILY: "1"  # iPhone only
+    entitlements:
+      path: BetterSelf/BetterSelf.entitlements
+      properties:
+        com.apple.developer.family-controls:
+          - true
+        com.apple.security.application-groups:
+          - group.com.betterself.app
+    dependencies:
+      - package: Alamofire
+      - package: KeychainAccess
+      - target: BetterSelfWidgets
+      - target: BetterSelfIntents
+
+  BetterSelfWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BetterSelfWidgets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.betterself.app.widgets
+    entitlements:
+      path: BetterSelfWidgets/BetterSelfWidgets.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.betterself.app
+
+  BetterSelfIntents:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BetterSelfIntents
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.betterself.app.intents
+
+  BetterSelfTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: BetterSelf
+
+packages:
+  Alamofire:
+    url: https://github.com/Alamofire/Alamofire.git
+    majorVersion: "5.0"
+  KeychainAccess:
+    url: https://github.com/kishikawakatsumi/KeychainAccess.git
+    majorVersion: "4.0"
+
+schemes:
+  BetterSelf:
+    build:
+      targets:
+        BetterSelf: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - BetterSelfTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

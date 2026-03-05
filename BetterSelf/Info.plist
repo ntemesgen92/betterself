@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>BetterSelf needs microphone access for voice commands with your AI assistant.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>BetterSelf uses speech recognition to understand your voice commands.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>BetterSelf needs calendar access to help manage your schedule.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>BetterSelf needs full calendar access to create and manage events on your behalf.</string>
+</dict>
+</plist>
