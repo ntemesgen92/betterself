@@ -1,62 +1,82 @@
 """
-BetterSelf -- AWS Infrastructure Diagram
-Shows VPC layout, security groups, and network architecture.
+BetterSelf -- AWS VPC & Network Architecture Diagram
+Shows VPC layout, security groups, subnets, and network flow.
 
 Usage:
     pip install diagrams
     python aws_infrastructure.py
 """
 
-from diagrams import Cluster, Diagram, Edge
+import os
+from diagrams import Diagram, Cluster, Edge
 from diagrams.aws.compute import Lambda
 from diagrams.aws.database import Aurora, Dynamodb
-from diagrams.aws.integration import SNS, Eventbridge
-from diagrams.aws.network import APIGateway, VPC, NATGateway, InternetGateway
-from diagrams.aws.security import Cognito, SecretsManager, WAF
+from diagrams.aws.network import APIGateway, VPC, PublicSubnet, PrivateSubnet, NATGateway, InternetGateway, Route53
+from diagrams.aws.security import Cognito, WAF, SecretsManager
 from diagrams.aws.storage import S3
+from diagrams.aws.management import Cloudwatch
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+graph_attr = {
+    "fontsize": "28",
+    "bgcolor": "white",
+    "pad": "0.8",
+    "nodesep": "0.8",
+    "ranksep": "1.2",
+    "splines": "ortho",
+    "dpi": "150",
+}
 
 with Diagram(
-    "BetterSelf - AWS Infrastructure",
+    "BetterSelf - VPC & Network Architecture",
+    filename=os.path.join(script_dir, "aws_vpc_architecture"),
     show=False,
     direction="TB",
-    filename="betterself_aws_infrastructure",
+    graph_attr=graph_attr,
     outformat="png",
 ):
+    internet = Route53("Internet\nTraffic")
 
-    waf = WAF("WAF\n(Rate Limiting)")
-
-    with Cluster("VPC (10.0.0.0/16)"):
-
+    with Cluster("VPC - 10.0.0.0/16", graph_attr={"style": "rounded", "bgcolor": "#E8F4FD"}):
         igw = InternetGateway("Internet\nGateway")
 
-        with Cluster("Public Subnets (10.0.1.0/24, 10.0.2.0/24)"):
-            nat = NATGateway("NAT Gateway")
-            api_gw = APIGateway("API Gateway\n(HTTP API)")
+        with Cluster("Edge Protection", graph_attr={"style": "rounded", "bgcolor": "#FFEBEE"}):
+            waf = WAF("Web Application\nFirewall (WAF)\nRate Limiting")
 
-        with Cluster("Private Subnets (10.0.3.0/24, 10.0.4.0/24)"):
+        with Cluster("Public Subnets", graph_attr={"style": "rounded", "bgcolor": "#D4EDDA"}):
+            pub_a = PublicSubnet("Public A\n10.0.1.0/24\nus-east-1a")
+            pub_b = PublicSubnet("Public B\n10.0.2.0/24\nus-east-1b")
+            api_gw = APIGateway("API Gateway\n(HTTP API)\nCognito Authorizer")
+            nat = NATGateway("NAT\nGateway")
 
-            with Cluster("Lambda Security Group"):
-                lambda_fn = Lambda("FastAPI Lambda\n(Python 3.12)")
+        with Cluster("Private Subnets", graph_attr={"style": "rounded", "bgcolor": "#FFF3CD"}):
+            priv_a = PrivateSubnet("Private A\n10.0.3.0/24\nus-east-1a")
+            priv_b = PrivateSubnet("Private B\n10.0.4.0/24\nus-east-1b")
 
-            with Cluster("Database Security Group"):
-                aurora = Aurora("Aurora Serverless v2\nPostgreSQL 15\n(0.5-4 ACU)")
+            with Cluster("Lambda Security Group\n(Outbound: 443 to Internet, 5432 to Aurora SG)", graph_attr={"style": "dashed", "bgcolor": "#FFF9C4", "pencolor": "#F57F17"}):
+                lambda_fn = Lambda("FastAPI Lambda\n(Python 3.12)\n256 MB / 30s timeout")
 
-    cognito = Cognito("Cognito User Pool\n(Email + Apple + Google)")
-    dynamodb = Dynamodb("DynamoDB\n(On-Demand, PITR)")
-    s3 = S3("S3 Buckets\n(Audio Temp + Assets)")
-    secrets = SecretsManager("Secrets Manager\n(DB Credentials)")
-    sns = SNS("SNS\n(APNs Platform App)")
-    eventbridge = Eventbridge("EventBridge\n(Briefing Cron)")
+            with Cluster("Aurora Security Group\n(Inbound: 5432 from Lambda SG only)", graph_attr={"style": "dashed", "bgcolor": "#FFF9C4", "pencolor": "#F57F17"}):
+                aurora = Aurora("Aurora Serverless v2\n(PostgreSQL 15)\n0.5-4 ACU\nCalendar + Tasks + Habits")
 
+    with Cluster("VPC Endpoints (Gateway)", graph_attr={"style": "rounded", "bgcolor": "#F3E5F5"}):
+        dynamodb = Dynamodb("DynamoDB\n(VPC Endpoint)\nUsers + Sessions\n+ Conversations")
+
+    with Cluster("Regional Services", graph_attr={"style": "rounded", "bgcolor": "#E8F0FE"}):
+        cognito = Cognito("Cognito\nUser Pool")
+        s3 = S3("S3 Buckets")
+        secrets = SecretsManager("Secrets\nManager")
+        logs = Cloudwatch("CloudWatch\nLogs")
+
+    internet >> igw
+    igw >> waf
     waf >> api_gw
-    igw >> nat
-    api_gw >> Edge(label="Cognito\nAuthorizer") >> cognito
-    api_gw >> lambda_fn
-
-    lambda_fn >> Edge(label="Port 5432") >> aurora
-    lambda_fn >> Edge(label="VPC Endpoint") >> dynamodb
-    lambda_fn >> s3
-    lambda_fn >> secrets
-    lambda_fn >> sns
-    eventbridge >> lambda_fn
+    api_gw >> Edge(label="JWT\nValidation") >> cognito
+    api_gw >> Edge(label="Invoke") >> lambda_fn
+    lambda_fn >> Edge(label="TCP 5432", color="blue") >> aurora
+    lambda_fn >> Edge(label="VPC Endpoint", color="orange") >> dynamodb
+    lambda_fn >> Edge(label="HTTPS", style="dashed", color="gray") >> s3
+    lambda_fn >> Edge(label="DB Creds", style="dashed", color="gray") >> secrets
+    lambda_fn >> Edge(label="Logs", style="dashed", color="gray") >> logs
+    nat >> Edge(label="Outbound\nInternet\n(Bedrock, Transcribe,\nPolly, SNS)") >> igw

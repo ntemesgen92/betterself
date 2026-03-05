@@ -25,55 +25,9 @@ General productivity-focused users -- professionals, students, entrepreneurs, an
 
 ## Architecture Overview
 
-```mermaid
-graph TB
-    subgraph iOS["iOS App (Swift)"]
-        SwiftUI[SwiftUI Views]
-        VM[ViewModels]
-        Services[Service Layer]
-        LocalStore[SwiftData]
-        FamilyCtrl[FamilyControls Framework]
-        EventKit[EventKit / Google Calendar SDK]
-        SpeechFW[Apple Speech Framework]
-        SiriKit[SiriKit / App Intents]
-        WidgetKit[WidgetKit + Live Activities]
-    end
+![BetterSelf Full System Architecture](diagrams/full_architecture.png)
 
-    subgraph AWS["AWS Cloud"]
-        APIGW[API Gateway]
-        Lambda[Lambda Functions]
-        FastAPI[FastAPI on Lambda]
-        Cognito[Cognito User Pool]
-        DynamoDB[DynamoDB]
-        AuroraDB["Aurora Serverless v2 (PostgreSQL)"]
-        Bedrock[AWS Bedrock LLM]
-        Transcribe[AWS Transcribe]
-        Polly[AWS Polly]
-        Pinpoint[AWS Pinpoint]
-        S3[S3]
-        SNS[SNS Push]
-    end
-
-    SwiftUI --> VM --> Services
-    Services --> LocalStore
-    Services --> FamilyCtrl
-    Services --> EventKit
-    Services --> SpeechFW
-    Services --> SiriKit
-    Services --> WidgetKit
-    Services --> APIGW
-    APIGW --> Cognito
-    APIGW --> FastAPI
-    FastAPI --> DynamoDB
-    FastAPI --> AuroraDB
-    FastAPI --> Bedrock
-    FastAPI --> Transcribe
-    FastAPI --> Polly
-    FastAPI --> S3
-    FastAPI --> SNS
-    SNS --> iOS
-    Pinpoint --> iOS
-```
+> Generated from `diagrams/full_architecture.py` using the Python [diagrams](https://diagrams.mingrammer.com/) library. To regenerate: `cd docs/design/diagrams && python3 full_architecture.py`
 
 ### Tech Stack
 
@@ -101,102 +55,9 @@ graph TB
 
 ## Data Models
 
-```mermaid
-erDiagram
-    User {
-        string id PK
-        string email
-        string name
-        string auth_provider
-        string subscription_tier
-        datetime created_at
-        jsonb preferences
-    }
+![BetterSelf Data Model ER Diagram](diagrams/data_models.png)
 
-    BlockingProfile {
-        string id PK
-        string user_id FK
-        string name
-        string mode
-        jsonb blocked_apps
-        jsonb allowed_apps
-        jsonb schedule
-        boolean is_active
-        boolean strict_mode
-    }
-
-    BlockingSession {
-        string id PK
-        string user_id FK
-        string profile_id FK
-        datetime start_time
-        datetime end_time
-        int override_attempts
-        boolean completed
-    }
-
-    CalendarEvent {
-        string id PK
-        string user_id FK
-        string external_id
-        string source
-        string title
-        string description
-        datetime start_time
-        datetime end_time
-        string location
-        boolean ai_created
-        jsonb recurrence
-    }
-
-    Task {
-        string id PK
-        string user_id FK
-        string title
-        string priority
-        string status
-        datetime due_date
-        datetime completed_at
-    }
-
-    Habit {
-        string id PK
-        string user_id FK
-        string name
-        string frequency
-        jsonb tracking_data
-        int current_streak
-    }
-
-    AIConversation {
-        string id PK
-        string user_id FK
-        datetime timestamp
-        string role
-        text content
-        string action_type
-        jsonb action_data
-    }
-
-    DailyBriefing {
-        string id PK
-        string user_id FK
-        date briefing_date
-        jsonb schedule_summary
-        jsonb tasks_summary
-        jsonb focus_summary
-        text ai_recommendations
-    }
-
-    User ||--o{ BlockingProfile : has
-    User ||--o{ BlockingSession : has
-    User ||--o{ CalendarEvent : has
-    User ||--o{ Task : has
-    User ||--o{ Habit : tracks
-    User ||--o{ AIConversation : chats
-    User ||--o{ DailyBriefing : receives
-    BlockingProfile ||--o{ BlockingSession : triggers
-```
+> Generated from `diagrams/data_models.py`. To regenerate: `cd docs/design/diagrams && python3 data_models.py`
 
 ### DynamoDB Tables
 
@@ -223,58 +84,9 @@ erDiagram
 
 ### 3-Tab Structure
 
-```mermaid
-flowchart TB
-    subgraph TabBar["Tab Bar"]
-        HomeTab[Home]
-        FocusTab[Focus]
-        CalendarTab[Calendar]
-    end
+![BetterSelf App Navigation](diagrams/app_navigation.png)
 
-    subgraph HomeFlow["Home Tab"]
-        Dashboard[Dashboard]
-        AIChat[AI Voice Chat]
-        DailyBrief[Daily Briefing]
-        TaskList[Task List]
-        HabitView[Habit Tracker]
-        Settings[Settings]
-    end
-
-    subgraph FocusFlow["Focus Tab"]
-        FocusHome[Focus Home]
-        ProfileList[Blocking Profiles]
-        ProfileEdit[Edit Profile]
-        AppPicker[App Picker]
-        ActiveSession[Active Focus Session]
-        FocusHistory[Focus History]
-    end
-
-    subgraph CalendarFlow["Calendar Tab"]
-        CalView[Calendar View]
-        EventDetail[Event Detail]
-        CreateEvent[Create Event]
-        AISchedule[AI Schedule Optimizer]
-    end
-
-    HomeTab --> Dashboard
-    Dashboard --> AIChat
-    Dashboard --> DailyBrief
-    Dashboard --> TaskList
-    Dashboard --> HabitView
-    Dashboard --> Settings
-
-    FocusTab --> FocusHome
-    FocusHome --> ProfileList
-    ProfileList --> ProfileEdit
-    ProfileEdit --> AppPicker
-    FocusHome --> ActiveSession
-    FocusHome --> FocusHistory
-
-    CalendarTab --> CalView
-    CalView --> EventDetail
-    CalView --> CreateEvent
-    CalView --> AISchedule
-```
+> Generated from `diagrams/app_navigation.py`. To regenerate: `cd docs/design/diagrams && python3 app_navigation.py`
 
 ### Key Screens
 
@@ -335,27 +147,9 @@ flowchart TB
 
 When strict mode is enabled and a user tries to override a blocking session, the AI acts as a gatekeeper:
 
-```mermaid
-flowchart TD
-    UserTries[User tries to end focus session early]
-    AIChallenge[AI asks: Why do you need to stop?]
-    UserResponds[User explains reason]
-    AIEvaluates[AI evaluates if reason is legitimate]
-    Legitimate{Legitimate reason?}
-    CoolDown[5-min cooldown before unlock]
-    Deny[AI encourages user to continue]
-    SecondAttempt[User can try again in 15 min]
-    Unlock[Session ended]
+![BetterSelf AI Gatekeeper Flow](diagrams/ai_gatekeeper_flow.png)
 
-    UserTries --> AIChallenge
-    AIChallenge --> UserResponds
-    UserResponds --> AIEvaluates
-    AIEvaluates --> Legitimate
-    Legitimate -->|Yes| CoolDown
-    Legitimate -->|No| Deny
-    CoolDown --> Unlock
-    Deny --> SecondAttempt
-```
+> Generated from `diagrams/ai_gatekeeper_flow.py`. To regenerate: `cd docs/design/diagrams && python3 ai_gatekeeper_flow.py`
 
 **Legitimate reasons (AI approves):** Genuine emergency, work-related urgent need, scheduled break time, physical safety concern
 
@@ -399,6 +193,12 @@ The AI analyzes the user's calendar to:
 - Suggest breaks between back-to-back meetings
 - Balance workload across the week
 
+### AI & Voice Processing Pipeline
+
+![BetterSelf AI & Voice Pipeline](diagrams/ai_voice_pipeline.png)
+
+> Generated from `diagrams/ai_voice_pipeline.py`. To regenerate: `cd docs/design/diagrams && python3 ai_voice_pipeline.py`
+
 ---
 
 ## Design Language
@@ -420,30 +220,17 @@ The AI analyzes the user's calendar to:
 
 ## AWS Infrastructure
 
-```mermaid
-graph TB
-    subgraph VPC["VPC"]
-        subgraph PublicSubnet["Public Subnets"]
-            APIGW2[API Gateway]
-        end
-        subgraph PrivateSubnet["Private Subnets"]
-            LambdaFn[Lambda Functions]
-            AuroraCluster[Aurora Serverless v2]
-        end
-    end
+### VPC & Network Architecture
 
-    Cognito2[Cognito] --> APIGW2
-    APIGW2 --> LambdaFn
-    LambdaFn --> DDB[DynamoDB]
-    LambdaFn --> AuroraCluster
-    LambdaFn --> BedrockAI[Bedrock]
-    LambdaFn --> TranscribeSvc[Transcribe]
-    LambdaFn --> PollySvc[Polly]
-    LambdaFn --> S3Store[S3]
-    LambdaFn --> SNSSvc[SNS]
-    PinpointSvc[Pinpoint] --> iOS2[iOS App]
-    SNSSvc --> iOS2
-```
+![BetterSelf VPC & Network Architecture](diagrams/aws_vpc_architecture.png)
+
+> Generated from `diagrams/aws_infrastructure.py`. To regenerate: `cd docs/design/diagrams && python3 aws_infrastructure.py`
+
+### Security Groups & IAM Roles
+
+![BetterSelf Security Groups & IAM](diagrams/security_groups.png)
+
+> Generated from `diagrams/security_groups.py`. To regenerate: `cd docs/design/diagrams && python3 security_groups.py`
 
 ### Cost Estimates (MVP, low traffic)
 
