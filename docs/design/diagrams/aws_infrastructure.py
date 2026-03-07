@@ -10,7 +10,7 @@ Usage:
 import os
 from diagrams import Diagram, Cluster, Edge
 from diagrams.aws.compute import Lambda
-from diagrams.aws.database import Aurora, Dynamodb
+from diagrams.aws.database import Dynamodb
 from diagrams.aws.network import APIGateway, VPC, PublicSubnet, PrivateSubnet, NATGateway, InternetGateway, Route53
 from diagrams.aws.security import Cognito, WAF, SecretsManager
 from diagrams.aws.storage import S3
@@ -54,14 +54,11 @@ with Diagram(
             priv_a = PrivateSubnet("Private A\n10.0.3.0/24\nus-east-1a")
             priv_b = PrivateSubnet("Private B\n10.0.4.0/24\nus-east-1b")
 
-            with Cluster("Lambda Security Group\n(Outbound: 443 to Internet, 5432 to Aurora SG)", graph_attr={"style": "dashed", "bgcolor": "#FFF9C4", "pencolor": "#F57F17"}):
+            with Cluster("Lambda Security Group\n(Outbound: 443 to Internet + DynamoDB VPC Endpoint)", graph_attr={"style": "dashed", "bgcolor": "#FFF9C4", "pencolor": "#F57F17"}):
                 lambda_fn = Lambda("FastAPI Lambda\n(Python 3.12)\n256 MB / 30s timeout")
 
-            with Cluster("Aurora Security Group\n(Inbound: 5432 from Lambda SG only)", graph_attr={"style": "dashed", "bgcolor": "#FFF9C4", "pencolor": "#F57F17"}):
-                aurora = Aurora("Aurora Serverless v2\n(PostgreSQL 15)\n0.5-4 ACU\nCalendar + Tasks + Habits")
-
     with Cluster("VPC Endpoints (Gateway)", graph_attr={"style": "rounded", "bgcolor": "#F3E5F5"}):
-        dynamodb = Dynamodb("DynamoDB\n(VPC Endpoint)\nUsers + Sessions\n+ Conversations")
+        dynamodb = Dynamodb("DynamoDB\n(VPC Endpoint)\nCalendar + Tasks + Habits\n+ Users + Sessions\n+ Conversations")
 
     with Cluster("Regional Services", graph_attr={"style": "rounded", "bgcolor": "#E8F0FE"}):
         cognito = Cognito("Cognito\nUser Pool")
@@ -74,7 +71,6 @@ with Diagram(
     waf >> api_gw
     api_gw >> Edge(label="JWT\nValidation") >> cognito
     api_gw >> Edge(label="Invoke") >> lambda_fn
-    lambda_fn >> Edge(label="TCP 5432", color="blue") >> aurora
     lambda_fn >> Edge(label="VPC Endpoint", color="orange") >> dynamodb
     lambda_fn >> Edge(label="HTTPS", style="dashed", color="gray") >> s3
     lambda_fn >> Edge(label="DB Creds", style="dashed", color="gray") >> secrets

@@ -124,9 +124,10 @@ While Dev A focuses on PM artifacts, Dev B starts building the foundation.
 
 | Days | Task | Details |
 |------|------|---------|
+| 1 | **Phase 0 Actions** | Submit Google OAuth consent screen for verification. Apply for FamilyControls entitlement. Set up `develop` branch + CI. |
 | 1-3 | M9: CDK Foundation | VPC, subnets, security groups, base stacks |
 | 3-5 | M10: Auth Infra | Cognito user pool, identity providers |
-| 5-7 | M11: Database Setup | DynamoDB tables, Aurora cluster |
+| 5-7 | M11: Database Setup | DynamoDB tables + GSIs (Aurora deferred to post-MVP) |
 | 7-9 | M12: Lambda + API Gateway | FastAPI project, Mangum, health check |
 | 9-11 | Help Dev A with AWS hands-on | Set up S3 bucket and DynamoDB table for Dev A to practice with. Pair on prompt testing via Bedrock console. |
 
@@ -140,13 +141,15 @@ After the interview, both devs shift to building the product.
 
 ### Dev A -- Weeks 3-6
 
-| Week | Milestone | Task | PM Angle |
-|------|-----------|------|----------|
-| 3 | M1-M2 | Project setup + data models (pair with Dev B) | Define acceptance criteria for each model |
-| 3-4 | M3 | Tab navigation + home dashboard | Write user stories first, then build |
-| 4-5 | M4 | Focus mode UI (profiles, timer, editor) | Document UX decisions and trade-offs |
-| 5-6 | M8 | AI chat UI + Apple Speech integration | Own the AI interaction design end-to-end |
-| 5-6 | -- | Basic AWS: Monitor CloudWatch logs from Dev B's APIs | Practice reading metrics, identify issues |
+| Week | Milestone | Task | PM Angle | Pairing? |
+|------|-----------|------|----------|----------|
+| 3 | M1-M2 | Project setup + data models | Define acceptance criteria for each model | **Pair with Dev B** (project structure, SwiftData patterns) |
+| 3-4 | M3 | Tab navigation + home dashboard | Write user stories first, then build | Solo (standard SwiftUI) |
+| 4-5 | M4 | Focus mode UI (profiles, timer, editor) | Document UX decisions and trade-offs | Solo (UI only, no FamilyControls) |
+| 5-6 | M8 | AI chat UI + Apple Speech integration | Own the AI interaction design end-to-end | **Dev B reviews** speech recognition code |
+| 5-6 | -- | Basic AWS: Monitor CloudWatch logs from Dev B's APIs | Practice reading metrics, identify issues | Dev B walkthrough |
+
+> **Note for Dev A:** M4 is UI only -- the FamilyControls integration (M5) is Dev B's milestone. You build the UI, Dev B wires it to the system framework. This avoids Dev A being blocked on complex framework APIs.
 
 **PM Deliverables each sprint:** Dev A writes a 1-page sprint retrospective: what shipped, what was learned, what to improve. This builds the "iterative delivery" muscle.
 
@@ -170,18 +173,22 @@ After the interview, both devs shift to building the product.
 
 **Discuss:** API contract review, demo progress, Dev A's first CloudWatch walkthrough
 
+**Scope check:** If >3 days behind schedule, consider cutting M27 (Live Activities) and M26 (Widgets). See Scope-Cut Triggers in `betterself_app_plan.md`.
+
 ---
 
 ## Phase 2: Core Features (Weeks 6-8)
 
 ### Dev A -- Weeks 6-8
 
-| Week | Milestone | Task | PM/AI Angle |
-|------|-----------|------|-------------|
-| 6-7 | M6 | Calendar UI (month/week/day views) | Define calendar UX requirements doc |
-| 7 | M7 | Calendar integration (EventKit + Google) | Learn REST API integration, OAuth concepts |
-| 7-8 | M8 | AI chat (continued) -- action confirmations, conversation history | Own the AI conversation UX, test prompt quality |
-| 7-8 | -- | Basic AWS: Write blocking session data to DynamoDB via a simple Python script | Hands-on data pipeline experience |
+| Week | Milestone | Task | PM/AI Angle | Pairing? |
+|------|-----------|------|-------------|----------|
+| 6-7 | M6 | Calendar UI (month/week/day views) | Define calendar UX requirements doc | Solo (standard SwiftUI) |
+| 7 | M7 | Calendar integration (EventKit + Google) | Learn REST API integration, OAuth concepts | **Dev B pairs on Google OAuth** (complex auth flow) |
+| 7-8 | M8 | AI chat (continued) -- action confirmations, conversation history | Own the AI conversation UX, test prompt quality | Solo |
+| 7-8 | -- | Basic AWS: Write blocking session data to DynamoDB via a simple Python script | Hands-on data pipeline experience | Dev B sets up table |
+
+> **Note for Dev A:** M7 calendar integration involves EventKit (manageable) + Google Calendar OAuth (complex). Dev B should pair on the Google OAuth implementation specifically -- this involves token refresh logic, scope management, and error handling that benefits from backend experience.
 
 ### Dev B -- Weeks 6-8
 
@@ -198,7 +205,9 @@ After the interview, both devs shift to building the product.
 - Dev A: All iOS UI screens built, calendar integration working
 - Dev B: All backend APIs deployed, AI secretary responding to prompts
 
-**Discuss:** First end-to-end test (Dev A's app hits Dev B's APIs), AI prompt quality review together, scope check
+**Discuss:** First end-to-end test (Dev A's app hits Dev B's APIs), AI prompt quality review together
+
+**Scope check:** If >5 days behind, cut M27 (Live Activities) + M26 (Widgets). If >7 days behind, also cut M28 (Siri Shortcuts). See Scope-Cut Triggers in `betterself_app_plan.md`.
 
 ---
 
@@ -220,10 +229,11 @@ Both devs work more closely together in this phase.
 
 | Week | Milestone | Task | iOS/AI Angle |
 |------|-----------|------|--------------|
-| 8-9 | M24-M25 | Blocking sync + Calendar sync (help Dev A) | Pair on complex sync logic |
-| 9 | M26 | iOS Widgets (WidgetKit) | Learn SwiftUI in an isolated context |
-| 9-10 | M27 | Live Activities (lock screen timer) | ActivityKit -- another good iOS learning task |
-| 10 | M28 | Siri Shortcuts (App Intents) | AI-adjacent: voice command -> action mapping |
+| 8-9 | M24-M25 | Blocking sync + Calendar sync (help Dev A) | **Priority.** Pair on complex sync logic -- this is critical path. |
+| 9-10 | M28 | Siri Shortcuts (App Intents) | AI-adjacent: voice command -> action mapping. Good iOS learning entry point. |
+| 10 | M26 | iOS Widgets (WidgetKit) | **Scope-cut candidate.** Only if on schedule. |
+
+> **Phase E rebalance:** M27 (Live Activities) moved to scope-cut first. Dev B's primary focus in this phase is M24-M25 (sync logic -- critical path) and M28 (Siri -- leverages Dev B's AI integration knowledge). Widgets (M26) are attempted only if time allows. This avoids Dev B being spread across 4 unfamiliar iOS milestones while also supporting critical sync work.
 
 ### Sync Point 3 -- End of Week 9
 
@@ -232,6 +242,8 @@ Both devs work more closely together in this phase.
 - Dev A has Pinpoint analytics sending events
 
 **Discuss:** Full device walkthrough, offline testing, AI gatekeeper testing, analytics data review
+
+**Scope check:** Final cut decision. If any Phase E milestones (M26-M28) are still unfinished, cut them now and redirect effort to M30-M32 (polish, testing, submission). Non-negotiables: app blocking, AI chat, calendar sync must be fully working.
 
 ---
 
@@ -242,7 +254,7 @@ Both devs work more closely together in this phase.
 | Week | Milestone | Task | PM Angle |
 |------|-----------|------|----------|
 | 10 | M30 | Polish + accessibility | Own accessibility requirements (VoiceOver, Dynamic Type) |
-| 10-11 | M31 | Testing (iOS) -- XCTest, XCUITest | Write test cases from user stories |
+| 10-11 | M31 | Integration/E2E testing (iOS) -- cross-feature flows, XCUITest (unit tests already written per-milestone) | Write E2E test cases from user stories |
 | 11 | -- | Product: Write App Store listing copy | Product marketing -- storytelling |
 | 11-12 | M32 | App Store submission | Manage the launch checklist |
 | 12 | -- | Product: Post-launch metrics review plan | Define what success looks like week 1, month 1 |
@@ -251,7 +263,7 @@ Both devs work more closely together in this phase.
 
 | Week | Milestone | Task |
 |------|-----------|------|
-| 10 | M31 | Testing (backend) -- pytest, integration tests |
+| 10 | M31 | Integration/E2E testing (backend) -- cross-service flows, end-to-end API tests (unit tests already written per-milestone) |
 | 10-11 | -- | CloudWatch dashboards, alarms, Bedrock cost monitoring |
 | 11 | -- | Security review: IAM roles, rate limiting, encryption audit |
 | 11-12 | M32 | Production deploy, SSL, domain, scaling config |
@@ -314,7 +326,7 @@ Entry-level AWS tasks throughout the project (with Dev B's guidance):
 | View API Gateway request logs | CloudWatch | Beginner | Weeks 8-9 |
 | Navigate the AWS Console, understand regions/services | General | Beginner | Throughout |
 
-**Not for Dev A (too complex):** VPC configuration, security groups, CDK/IaC, IAM policies, Lambda deployment, NAT gateways, Aurora cluster management
+**Not for Dev A (too complex):** VPC configuration, security groups, CDK/IaC, IAM policies, Lambda deployment, NAT gateways, DynamoDB GSI design
 
 ---
 
@@ -339,7 +351,7 @@ Entry-level AWS tasks throughout the project (with Dev B's guidance):
 | Dev A blocked on complex iOS | Dev B pairs on hard tasks (FamilyControls, calendar sync). |
 | Dev B's iOS learning curve | Start with isolated WidgetKit/Siri tasks. Dev A reviews PRs. |
 | Cross-exposure slows velocity | Limit cross-tasks to 20% of each sprint. Core track is primary. |
-| Falling behind schedule | Each sync point includes scope check. Cut: meeting prep, advanced analytics, Apple Watch. Keep: blocking, AI chat, calendar. |
+| Falling behind schedule | Each sync point includes explicit scope check. **See Scope-Cut Triggers in `betterself_app_plan.md` for prioritized cut order.** Non-negotiable: blocking, AI chat, calendar. |
 | FamilyControls entitlement delayed | Apply in Week 1. Build nudge UI as fallback. |
 
 ---
@@ -347,8 +359,26 @@ Entry-level AWS tasks throughout the project (with Dev B's guidance):
 ## Definition of Done (per milestone)
 
 1. All planned features work as described in the milestone file
-2. Code is merged to `develop` via reviewed PR
-3. No known crashes or critical bugs
-4. Milestone file status updated to "Completed" with "What Was Built" section
-5. Any deviations from the plan documented in the milestone's "Notes" section
-6. **Dev A additionally:** Sprint retro written, user stories documented
+2. **Tests written for critical-path logic introduced in this milestone** (unit tests for parsers, validators, sync logic, AI action handling; UI tests for core flows). Tests are NOT deferred -- they ship with the code.
+3. Code is merged to `develop` via reviewed PR
+4. No known crashes or critical bugs
+5. Milestone file status updated to "Completed" with "What Was Built" section
+6. Any deviations from the plan documented in the milestone's "Notes" section
+7. **Dev A additionally:** Sprint retro written, user stories documented
+
+### Per-Milestone Test Requirements
+
+| Milestone | Required Tests |
+|-----------|---------------|
+| M2 (Data Models) | Unit tests for all model creation, validation, and relationships |
+| M5 (FamilyControls) | Unit tests for BlockingService authorization flow; manual device test checklist |
+| M7 (Calendar Integration) | Unit tests for CalendarSyncEngine conflict resolution logic |
+| M8 (AI Chat) | Unit tests for SpeechService transcription handling; UI test for chat send flow |
+| M13 (AI Services) | Unit tests for Bedrock invocation wrapper, prompt assembly, action JSON parsing |
+| M14-M15 (User + Blocking API) | pytest tests for all CRUD endpoints, auth middleware rejection |
+| M16 (Calendar API) | pytest tests for date range queries, conflict detection, sync merge |
+| M17 (AI Secretary API) | pytest tests for action parsing, context building, token budgeting, conversation threading |
+| M19 (Tasks + Habits) | pytest tests for prioritization logic, streak calculation |
+| M22 (API Client) | Unit tests for offline queue replay, retry logic |
+| M25 (Calendar Sync) | Integration test for full sync round-trip with conflict scenarios |
+| M31 (Testing) | **Integration/E2E tests only** -- verifies cross-system flows, not individual units (those already exist). TestFlight beta distribution. |

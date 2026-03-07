@@ -38,6 +38,13 @@ Milestones 9 (CDK Foundation), 12 (Lambda & API Gateway)
 - Polly generates audio from text
 - End-to-end: text in → AI response + action JSON out
 
+## Test Requirements (Definition of Done)
+- Unit tests for Bedrock invocation wrapper (request formatting, response deserialization, error handling)
+- Unit tests for prompt assembly (system prompt + context + user message concatenation, token budget enforcement)
+- Unit tests for action JSON parsing from AI response text (valid actions, malformed JSON, missing fields)
+- Unit tests for token counting and budget limit enforcement
+- Unit tests for voice_service audio format handling (PCM/MP3 conversion paths)
+
 ## Notes
 - **Duration**: 3 days
 - Bedrock model access may need to be requested and can take 1-2 days for approval

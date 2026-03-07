@@ -10,7 +10,7 @@ Usage:
 import os
 from diagrams import Diagram, Cluster, Edge
 from diagrams.aws.compute import Lambda
-from diagrams.aws.database import Aurora, Dynamodb
+from diagrams.aws.database import Dynamodb
 from diagrams.aws.integration import SNS, Eventbridge
 from diagrams.aws.ml import Transcribe
 from diagrams.aws.network import APIGateway, VPC as VPCIcon, NATGateway, InternetGateway
@@ -70,11 +70,8 @@ with Diagram(
                 nat = NATGateway("NAT\nGateway")
 
             with Cluster("Private Subnets", graph_attr={"style": "rounded", "bgcolor": "#F3E5F5"}):
-                with Cluster("Lambda SG\n(Outbound: Internet + DB)", graph_attr={"style": "dashed", "bgcolor": "#CE93D8", "pencolor": "#6A1B9A"}):
+                with Cluster("Lambda SG\n(Outbound: Internet + DynamoDB)", graph_attr={"style": "dashed", "bgcolor": "#CE93D8", "pencolor": "#6A1B9A"}):
                     lambda_fn = Lambda("FastAPI Lambda\n(Python 3.12)\n256 MB / 30s timeout")
-
-                with Cluster("Aurora SG\n(Inbound: 5432 from Lambda SG)", graph_attr={"style": "dashed", "bgcolor": "#CE93D8", "pencolor": "#6A1B9A"}):
-                    aurora = Aurora("Calendar & Tasks DB\n(Aurora Serverless v2\nPostgreSQL 15)\n0.5-4 ACU")
 
         with Cluster("AI & Voice Pipeline", graph_attr={"style": "rounded", "bgcolor": "#E0F7FA"}):
             bedrock = Lambda("AWS Bedrock\n(Claude 3 Sonnet)\nAI Secretary")
@@ -82,7 +79,7 @@ with Diagram(
             polly = Lambda("AWS Polly\n(Neural TTS)\nJoanna Voice")
 
         with Cluster("Data Stores", graph_attr={"style": "rounded", "bgcolor": "#FBE9E7"}):
-            dynamodb = Dynamodb("DynamoDB\n(Users, Profiles,\nSessions, Chats)\nOn-Demand + PITR")
+            dynamodb = Dynamodb("DynamoDB\n(Calendar, Tasks, Habits,\nUsers, Profiles,\nSessions, Chats)\nOn-Demand + PITR")
             s3 = S3("S3\n(Audio Temp\n+ Assets)")
 
         with Cluster("Notifications & Scheduling", graph_attr={"style": "rounded", "bgcolor": "#E0F2F1"}):
@@ -110,8 +107,7 @@ with Diagram(
     api_gw >> Edge(label="Cognito\nAuthorizer") >> cognito
     api_gw >> lambda_fn
 
-    lambda_fn >> Edge(label="SQL\n(Calendar, Tasks,\nHabits)", color="blue") >> aurora
-    lambda_fn >> Edge(label="NoSQL\n(Users, Sessions,\nConversations)", color="orange") >> dynamodb
+    lambda_fn >> Edge(label="DynamoDB\n(Calendar, Tasks, Habits,\nUsers, Sessions,\nConversations)", color="orange") >> dynamodb
     lambda_fn >> Edge(label="AI Chat +\nSchedule\nOptimization", color="purple") >> bedrock
     lambda_fn >> Edge(label="Premium\nSTT", color="teal") >> transcribe
     lambda_fn >> Edge(label="TTS\nResponse", color="teal") >> polly

@@ -30,7 +30,7 @@ Milestones 10 (Auth Infrastructure), 12 (Lambda & API Gateway)
 4. **PUT /users/me**: Update user profile (name, preferences)
 5. **PUT /users/me/preferences**: Update AI preferences, notification settings, calendar connections
 6. **GET /users/me/subscription**: Return subscription tier and usage stats (AI queries remaining today)
-7. **DELETE /users/me**: Account deletion (GDPR compliance) - removes DynamoDB records, anonymizes Aurora data, triggers Cognito user deletion
+7. **DELETE /users/me**: Account deletion (GDPR compliance) - removes all DynamoDB records across tables, triggers Cognito user deletion
 8. **Pydantic models**: Request/response validation
 9. **Cognito trigger**: Post-confirmation Lambda trigger to auto-create DynamoDB user record
 
@@ -40,6 +40,13 @@ Milestones 10 (Auth Infrastructure), 12 (Lambda & API Gateway)
 - Profile CRUD works
 - Account deletion removes all user data
 - Rate limiting on auth endpoints works
+
+## Test Requirements (Definition of Done)
+- pytest tests for POST /auth/register (success, duplicate, invalid input)
+- pytest tests for GET/PUT /users/me profile CRUD
+- pytest tests for auth middleware rejection (missing token, expired token, malformed token)
+- pytest test for DELETE /users/me data removal verification
+- pytest test for rate limiting on auth endpoints
 
 ## Notes
 - **Duration**: 2 days

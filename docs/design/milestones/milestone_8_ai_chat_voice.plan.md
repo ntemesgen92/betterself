@@ -93,5 +93,12 @@ Build the AI chat interface with push-to-talk voice input using Apple Speech fra
 - Conversation persists after app restart
 - Loading state shows while "AI" is "thinking"
 
+## Test Requirements (Definition of Done)
+- Unit tests for SpeechService transcription handling (start, partial results, final transcript, error states)
+- Unit tests for AIChatViewModel message flow (send, receive mock response, persist)
+- UI test for chat send flow: type message → tap send → message appears in bubble → AI response appears
+- Unit tests for mock AI command parsing (schedule, block, briefing keywords)
+- Unit test for conversation persistence round-trip via SwiftData
+
 ## Notes
 - Duration: 4 days

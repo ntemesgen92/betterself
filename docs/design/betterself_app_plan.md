@@ -43,8 +43,7 @@ General productivity-focused users -- professionals, students, entrepreneurs, an
 | Backend | Python (FastAPI) on AWS Lambda | Fast development, great AI library ecosystem |
 | API Layer | API Gateway + Lambda (Mangum adapter) | Serverless, scales automatically |
 | Auth | AWS Cognito | Supports email/password + Apple + Google sign-in |
-| Database (sessions/real-time) | DynamoDB | User sessions, blocking rules, AI conversation history |
-| Database (structured) | Aurora Serverless v2 (PostgreSQL) | Calendar events, analytics, user profiles (NOTE: final choice to be revisited during infrastructure milestone) |
+| Database | DynamoDB (on-demand) | All data for MVP -- users, blocking, sessions, calendar, tasks, habits, conversations. Aurora deferred to post-MVP. |
 | AI/LLM | AWS Bedrock (Claude/Titan) | Managed, stays in AWS, flexible model choice |
 | Push Notifications | AWS SNS + APNs | Daily briefings, schedule reminders |
 | Analytics | AWS Pinpoint | In-ecosystem, user engagement tracking |
@@ -59,24 +58,20 @@ General productivity-focused users -- professionals, students, entrepreneurs, an
 
 > Generated from `diagrams/data_models.py`. To regenerate: `cd docs/design/diagrams && python3 data_models.py`
 
-### DynamoDB Tables
+### DynamoDB Tables (MVP -- DynamoDB Only)
 
-| Table | Partition Key | Sort Key | Purpose |
-|-------|--------------|----------|---------|
-| Users | user_id | - | User profiles, preferences, subscription status |
-| BlockingProfiles | user_id | profile_id | Blocking rules and schedules |
-| BlockingSessions | user_id | start_time | Focus session history and analytics |
-| AIConversations | user_id | timestamp | Conversation history with the AI |
+> **Decision:** Aurora Serverless v2 was cut for MVP to reduce cost (~$15-50/month floor), eliminate VPC/connection-pooling complexity, and simplify the infrastructure. All data is modeled in DynamoDB. Aurora can be added post-launch if relational query patterns emerge that DynamoDB cannot handle efficiently.
 
-### Aurora PostgreSQL Tables
-
-| Table | Purpose |
-|-------|---------|
-| calendar_events | Synced calendar events with recurrence support |
-| tasks | Task management with priority and status |
-| habits | Habit definitions and tracking data |
-| daily_briefings | Generated daily summaries |
-| analytics | Aggregated usage analytics for insights |
+| Table | Partition Key | Sort Key | GSI | Purpose |
+|-------|--------------|----------|-----|---------|
+| Users | user_id | - | email-index (GSI on email) | User profiles, preferences, subscription status |
+| BlockingProfiles | user_id | profile_id | - | Blocking rules and schedules |
+| BlockingSessions | user_id | start_time | profile-index (GSI on profile_id) | Focus session history and analytics |
+| AIConversations | user_id | timestamp | conversation-index (GSI on conversation_id) | Conversation history with the AI |
+| CalendarEvents | user_id | event_id | date-index (GSI on start_date) | Synced calendar events, supports date range queries via GSI |
+| Tasks | user_id | task_id | status-index (GSI on status + due_date) | Task management with priority and status |
+| Habits | user_id | habit_id | - | Habit definitions and tracking data |
+| DailyBriefings | user_id | briefing_date | - | Generated daily summaries |
 
 ---
 
@@ -238,17 +233,26 @@ The AI analyzes the user's calendar to:
 |---------|-------------|
 | Lambda | ~$0-5 (free tier) |
 | API Gateway | ~$0-3 |
-| DynamoDB | ~$0-5 (on-demand) |
-| Aurora Serverless v2 | ~$15-50 (scales to near-zero) |
+| DynamoDB | ~$0-10 (on-demand, all tables) |
 | Bedrock | ~$10-50 (usage dependent) |
 | Cognito | Free (up to 50k MAU) |
 | Pinpoint | ~$0-5 |
 | S3 | ~$0-1 |
-| **Total** | **~$25-120/month** |
+| **Total** | **~$10-75/month** |
 
 ---
 
 ## Development Phases & Milestones
+
+### Phase 0: Pre-Development (Day 1)
+
+Before any code is written, these **blocking items** must be completed:
+
+| Action | Owner | Why |
+|--------|-------|-----|
+| Submit Google Cloud Console OAuth consent screen for verification | Dev B | Google's security review takes 4-6 weeks. Starting Day 1 avoids blocking M7 calendar integration. |
+| Apply for FamilyControls entitlement | Dev A | Apple's approval process is unpredictable. Early application gives maximum buffer. |
+| Create shared `develop` branch, CI pipeline, and PR templates | Dev B | Ensures both developers can work in parallel from Day 1. |
 
 ### Phase A: iOS App Foundation (Weeks 1-4)
 
@@ -269,7 +273,7 @@ The AI analyzes the user's calendar to:
 |---|-----------|-------------|----------|
 | 9 | AWS CDK Foundation | VPC, subnets, security groups, base CDK stacks | 2 days |
 | 10 | Auth Infrastructure | Cognito user pool (email + Apple + Google), API Gateway with Cognito authorizer | 2 days |
-| 11 | Database Setup | DynamoDB tables + Aurora Serverless v2 cluster, CDK definitions | 2 days |
+| 11 | Database Setup | DynamoDB tables with GSIs, CDK definitions (Aurora deferred to post-MVP) | 2 days |
 | 12 | Lambda & API Gateway | FastAPI project structure, Mangum adapter, deploy pipeline, health checks | 2 days |
 | 13 | AI & Voice Services | Bedrock integration, Transcribe + Polly setup, prompt engineering for secretary persona | 3 days |
 
@@ -304,8 +308,25 @@ The AI analyzes the user's calendar to:
 | 28 | Siri Shortcuts | App Intents for "schedule event", "start focus", "what's my day look like" | 2 days |
 | 29 | Onboarding Flow | Guided setup screens (goals, schedule, app selection, calendar connection, AI introduction) | 3 days |
 | 30 | Polish & Accessibility | Animations, haptics, VoiceOver support, Dynamic Type, edge cases | 3 days |
-| 31 | Testing & QA | Unit tests, UI tests, integration tests, TestFlight beta | 3 days |
+| 31 | Integration Testing & Beta | **Integration/E2E tests only** (unit tests already written per-milestone). Cross-system flow verification, TestFlight beta distribution. | 3 days |
 | 32 | App Store Submission | Screenshots, App Store listing, privacy policy, FamilyControls entitlement application, review submission | 3 days |
+
+---
+
+## Scope-Cut Triggers
+
+If the team falls behind schedule, cut features in this order (lowest impact first). Every sync point (see `developer_roadmaps.md`) includes a scope check against these triggers.
+
+| Priority | Feature to Cut | Trigger | Impact on MVP |
+|----------|---------------|---------|---------------|
+| Cut first | M27: Live Activities | >3 days behind at Phase D sync | Nice-to-have. Lock screen timer is polish, not core. |
+| Cut second | M26: iOS Widgets | >5 days behind at Phase D sync | Users can still access everything from the app itself. |
+| Cut third | M28: Siri Shortcuts | >5 days behind at Phase E start | Voice interaction still works in-app via push-to-talk. |
+| Cut fourth | Meeting prep (in M17) | AI Sprint planning shows complexity | Strip from AI action parser. Daily briefing + scheduling covers 90% of value. |
+| Cut fifth | Advanced analytics (in M19) | Backend Sprint 3 overflows | Basic streak/count is enough for launch. Rich charts are post-MVP. |
+| **Never cut** | App blocking (M4-M5) | -- | Core value prop #1. |
+| **Never cut** | AI chat + calendar actions (M8, M17, M23) | -- | Core value prop #2. |
+| **Never cut** | Calendar sync (M7, M25) | -- | Required for AI to be useful. |
 
 ---
 
@@ -447,8 +468,8 @@ backend/
 |------|--------|-----------|
 | FamilyControls entitlement approval delayed | Cannot ship app blocking | Apply during Phase A. Build accountability/nudge UI as fallback. |
 | Voice latency (AWS round-trip 3-5s) | Poor UX for voice interaction | Use Apple Speech on-device for transcription, send text to Bedrock, Polly only for response. Show "thinking" animation. |
-| Google Calendar OAuth verification | Cannot integrate Google Calendar | Start Google Cloud Console verification early (can take weeks). Ship with Apple Calendar first if delayed. |
-| Database choice uncertainty | Over/under-engineering data layer | Start with DynamoDB only for MVP. Add Aurora only if complex relational queries emerge. Revisit in Milestone 11. |
+| Google Calendar OAuth verification delay | Google security review can take 4-6 weeks. If started late, blocks calendar integration. | **Start OAuth consent screen verification on Day 1 of Phase 0.** Submit with screenshots and description immediately. Ship with Apple Calendar only if Google verification is delayed. |
+| DynamoDB query limitations | Complex date-range or relational queries may be awkward | Use GSIs for common access patterns (date ranges, status filters). If DynamoDB becomes a bottleneck post-launch, migrate specific tables to Aurora. |
 | Bedrock model availability/cost | AI features too expensive | Implement token budgeting per user tier. Use smaller models for simple actions, larger for complex reasoning. |
 | App Store review rejection | Launch delay | Review Apple's guidelines early, especially for FamilyControls. Prepare appeals documentation. |
 

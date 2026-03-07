@@ -71,6 +71,13 @@ Integrate EventKit for Apple Calendar and Google Calendar REST API. Implement a 
 - Background sync runs and updates data
 - Re-auth flow works when token expires
 
+## Test Requirements (Definition of Done)
+- Unit tests for CalendarSyncEngine conflict resolution (last-modified-wins, same-timestamp tie)
+- Unit tests for event deduplication by external_id across sources
+- Unit tests for merge logic (new, updated, deleted events from each source)
+- CalendarService facade routing tests (Apple vs Google source dispatch)
+- Mock-based tests for EventKitManager and GoogleCalendarManager mapping
+
 ## Notes
 - Google Calendar API requires Google Cloud Console project setup
 - Start OAuth consent screen verification early for production

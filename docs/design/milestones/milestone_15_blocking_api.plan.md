@@ -39,5 +39,12 @@ Milestones 12 (Lambda & API Gateway), 14 (User & Auth API)
 - Stats endpoint returns correct aggregations
 - Authorization ensures users can only access their own data
 
+## Test Requirements (Definition of Done)
+- pytest tests for full CRUD lifecycle on /blocking/profiles (create, list, get, update, delete)
+- pytest tests for POST /blocking/sessions logging and GET with date range filter
+- pytest tests for /blocking/stats aggregation accuracy
+- pytest tests for auth middleware (reject unauthenticated, reject cross-user access)
+- pytest tests for input validation (invalid schedule, empty blocked_apps)
+
 ## Notes
 - **Duration**: 2 days
