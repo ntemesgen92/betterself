@@ -4,7 +4,7 @@
 Not Started
 
 ## Goal
-Implement calendar event CRUD, external calendar sync management, and AI-created event handling. Events stored in Aurora PostgreSQL with support for recurrence, conflict detection, and AI-powered schedule optimization.
+Implement calendar event CRUD, external calendar sync management, and AI-created event handling. Events stored in DynamoDB with GSIs for date-range queries, with support for recurrence, conflict detection, and AI-powered schedule optimization.
 
 ## Dependencies
 Milestones 11 (Database Setup), 12 (Lambda & API Gateway), 14 (User & Auth API)
@@ -31,7 +31,7 @@ Milestones 11 (Database Setup), 12 (Lambda & API Gateway), 14 (User & Auth API)
 6. **POST /calendar/sync**: Trigger sync from iOS (receives batch of local calendar events, merges with cloud state)
 7. **GET /calendar/conflicts**: Detect scheduling conflicts in date range
 8. **POST /calendar/optimize**: AI-powered schedule optimization (calls Bedrock to analyze schedule and suggest improvements), returns list of proposed changes
-9. **Storage**: Aurora PostgreSQL (better for date range queries and recurrence)
+9. **Storage**: DynamoDB CalendarEvents table with user_date-index GSI for date-range queries
 10. **Recurrence**: Store RRULE-compatible recurrence rules, expand occurrences on read
 11. **AI events**: Flag ai_created=true and link to AI conversation that created them
 
@@ -41,6 +41,13 @@ Milestones 11 (Database Setup), 12 (Lambda & API Gateway), 14 (User & Auth API)
 - Sync merges correctly
 - Conflict detection identifies overlapping events
 - AI optimization returns valid suggestions
+
+## Test Requirements (Definition of Done)
+- pytest tests for event CRUD endpoints (create, list, get, update, delete)
+- pytest tests for date range query filtering and boundary conditions
+- pytest tests for conflict detection (overlapping events, adjacent events, no conflict)
+- pytest tests for sync merge logic (new/updated/deleted events, idempotent replay)
+- pytest test for recurrence rule storage and occurrence expansion
 
 ## Notes
 - **Duration**: 3 days

@@ -45,5 +45,12 @@ Milestones 12 (Lambda API), 21 (Auth Integration)
 - Background sync runs periodically
 - Error states display correctly in UI
 
+## Test Requirements (Definition of Done)
+- Unit tests for OfflineQueue replay (operations replayed in order on reconnect, queue cleared after success)
+- Unit tests for retry logic (exponential backoff timing, max retry cap, non-retryable error short-circuit)
+- Unit tests for APIClient token injection and 401 → token refresh flow
+- Unit tests for NetworkMonitor connectivity state transitions
+- Unit tests for SyncEngine conflict resolution (server-wins default, ambiguous case detection)
+
 ## Notes
 - **Duration**: 3 days

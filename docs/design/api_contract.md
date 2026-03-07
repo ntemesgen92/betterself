@@ -338,7 +338,8 @@ Batch sync from iOS client. Sends local changes, receives server changes.
 ```json
 // Request
 {
-  "message": "Schedule gym 3 times this week in the evening"
+  "message": "Schedule gym 3 times this week in the evening",
+  "conversation_id": "conv_xyz"  // optional -- omit to start new conversation, include to continue existing one
 }
 
 // Response 200

@@ -10,7 +10,7 @@ Usage:
 import os
 from diagrams import Diagram, Cluster, Edge
 from diagrams.aws.compute import Lambda
-from diagrams.aws.database import Aurora, Dynamodb
+from diagrams.aws.database import Dynamodb
 from diagrams.aws.network import APIGateway
 from diagrams.aws.security import Cognito, IAMRole, WAF, SecretsManager
 from diagrams.aws.storage import S3
@@ -41,15 +41,11 @@ with Diagram(
             waf = WAF("Web Application\nFirewall (WAF)")
             api_gw = APIGateway("API Gateway\n(HTTP API)")
 
-        with Cluster("Lambda SG\nInbound: From API Gateway\nOutbound: 5432, 443"):
+        with Cluster("Lambda SG\nInbound: From API Gateway\nOutbound: 443 (HTTPS)"):
             lambda_fn = Lambda("FastAPI Lambda\n(Python 3.12)")
-
-        with Cluster("Aurora SG\nInbound: 5432 from Lambda SG only"):
-            aurora = Aurora("Aurora Serverless v2\n(PostgreSQL 15)")
 
     waf >> Edge(label="Filtered\nTraffic") >> api_gw
     api_gw >> Edge(label="Invoke", color="darkgreen") >> lambda_fn
-    lambda_fn >> Edge(label="TCP 5432", color="blue") >> aurora
 
     with Cluster("Lambda Execution Role", graph_attr={"style": "rounded", "bgcolor": "#E8F0FE"}):
         exec_role = IAMRole("Lambda\nExecution Role")
@@ -66,7 +62,7 @@ with Diagram(
 
     exec_role >> Edge(label="Pull Layer\n+ Write Logs", style="dashed") >> logs
 
-    task_role >> Edge(label="CRUD\n(Users, Sessions,\nProfiles, Chats)", style="dashed", color="orange") >> dynamodb
+    task_role >> Edge(label="CRUD\n(Calendar, Tasks, Habits,\nUsers, Sessions,\nProfiles, Chats)", style="dashed", color="orange") >> dynamodb
     task_role >> Edge(label="Read/Write\nAudio", style="dashed", color="gray") >> s3
     task_role >> Edge(label="Publish\nPush", style="dashed", color="teal") >> sns
     task_role >> Edge(label="Get DB\nCredentials", style="dashed", color="red") >> secrets

@@ -70,5 +70,12 @@ Define all SwiftData models for the app's core entities, create a mock data serv
 - SwiftData persistence round-trip tests (save, fetch, verify)
 - KeychainManager stores and retrieves tokens correctly
 
+## Test Requirements (Definition of Done)
+- Unit tests for all `@Model` class creation and property validation
+- Unit tests for model relationships (e.g., BlockingSession → BlockingProfile)
+- Repository protocol conformance tests with mock ModelContext
+- MockDataService returns expected data counts and correct structure
+- KeychainManager save/load/delete round-trip tests
+
 ## Notes
 - Duration: 2 days

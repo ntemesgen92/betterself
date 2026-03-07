@@ -10,7 +10,7 @@ Usage:
 import os
 from diagrams import Diagram, Cluster, Edge
 from diagrams.aws.compute import Lambda
-from diagrams.aws.database import Dynamodb, Aurora
+from diagrams.aws.database import Dynamodb
 from diagrams.aws.ml import Transcribe
 from diagrams.aws.storage import S3
 from diagrams.generic.device import Mobile
@@ -57,8 +57,8 @@ with Diagram(
         action_parser = Lambda("Action Parser\n(JSON Extraction)")
 
     with Cluster("Action Execution", graph_attr={"style": "rounded", "bgcolor": "#FBE9E7"}):
-        calendar_action = Aurora("Create/Update\nCalendar Event")
-        task_action = Aurora("Create/Update\nTask")
+        calendar_action = Dynamodb("Create/Update\nCalendar Event")
+        task_action = Dynamodb("Create/Update\nTask")
         blocking_action = Dynamodb("Update Blocking\nProfile")
         briefing_action = Lambda("Generate\nDaily Briefing")
 

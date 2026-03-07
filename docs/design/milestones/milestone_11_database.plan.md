@@ -4,36 +4,40 @@
 Not Started
 
 ## Goal
-Deploy DynamoDB tables and Aurora Serverless v2 PostgreSQL cluster via CDK. Table schemas are defined and ready for application use, with appropriate indexes and recovery options.
+DynamoDB tables + GSIs, CDK definitions (Aurora deferred to post-MVP). Table schemas are defined and ready for application use, with appropriate indexes, access patterns, and recovery options.
 
 ## Dependencies
 Milestone 9 (CDK Foundation)
 
 ## Plan
-- Create DynamoDB tables for Users, BlockingProfiles, BlockingSessions, AIConversations
-- Deploy Aurora Serverless v2 PostgreSQL cluster
-- Define Aurora table schemas and migration scripts
-- Configure Secrets Manager and VPC endpoints
+- Create DynamoDB tables for all entities: Users, BlockingProfiles, BlockingSessions, AIConversations, CalendarEvents, Tasks, Habits, DailyBriefings
+- Design GSIs for each table's access patterns
+- Configure billing, TTLs, and point-in-time recovery
+- Set up VPC endpoints for DynamoDB
 
 ## Key Files
 | File | Description |
 |------|-------------|
-| infrastructure/stacks/database_stack.py | DynamoDB tables, Aurora cluster, Secrets Manager |
+| infrastructure/stacks/database_stack.py | DynamoDB tables, GSIs, VPC endpoints |
 
 ## Implementation Details
-1. **DynamoDB tables**: Users (PK: user_id), BlockingProfiles (PK: user_id, SK: profile_id), BlockingSessions (PK: user_id, SK: start_time, GSI on profile_id), AIConversations (PK: user_id, SK: timestamp)
-2. **DynamoDB configuration**: On-demand billing, point-in-time recovery enabled, TTL on AIConversations (90 days)
-3. **Aurora Serverless v2**: PostgreSQL 15, min 0.5 ACU / max 4 ACU (scales to near-zero), deployed in private subnets
-4. **Aurora tables**: calendar_events, tasks, habits, daily_briefings, analytics (SQL migration scripts)
-5. **Secrets Manager**: Store Aurora credentials
-6. **VPC endpoints**: For DynamoDB (saves NAT costs)
+1. **Users table**: PK: user_id. Stores profile, preferences, subscription status.
+2. **BlockingProfiles table**: PK: user_id, SK: profile_id. Stores app-blocking profile configs.
+3. **BlockingSessions table**: PK: user_id, SK: start_time. GSI: profile_id-index (PK: profile_id, SK: start_time) for querying sessions by profile.
+4. **AIConversations table**: PK: user_id, SK: timestamp. TTL: 90 days.
+5. **CalendarEvents table**: PK: user_id, SK: event_id. GSI: user_date-index (PK: user_id, SK: start_time) for date-range queries. GSI: source-index (PK: user_id, SK: source) for filtering by calendar source. Stores recurrence rules, AI-created flag, sync metadata.
+6. **Tasks table**: PK: user_id, SK: task_id. GSI: status-due-index (PK: user_id#status, SK: due_date) for filtered queries by status and due date. GSI: priority-index (PK: user_id, SK: priority) for prioritization queries.
+7. **Habits table**: PK: user_id, SK: habit_id. Stores frequency, streak counter, last check-in date. HabitCheckIns stored as items with PK: user_id#habit_id, SK: date.
+8. **DailyBriefings table**: PK: user_id, SK: date. Stores generated briefing content and metadata.
+9. **DynamoDB configuration**: On-demand billing for all tables, point-in-time recovery enabled, TTL on AIConversations (90 days).
+10. **VPC endpoints**: Gateway endpoint for DynamoDB (saves NAT costs).
 
 ## Testing
-- DynamoDB tables created with correct schemas and GSIs
-- Aurora cluster accessible from Lambda security group
-- SQL migrations run successfully
-- Read/write operations work
+- All DynamoDB tables created with correct schemas and GSIs
+- Read/write operations work on all tables
+- GSI queries return correct results for each access pattern
+- TTL configured correctly on AIConversations
 
 ## Notes
 - **Duration**: 2 days
-- The DynamoDB-only vs DynamoDB+Aurora decision should be finalized here. If query patterns are simple enough, consider dropping Aurora for MVP to reduce cost and complexity. Document the decision.
+- **Decision**: DynamoDB-only for MVP. Aurora PostgreSQL deferred to post-MVP. If complex relational queries are needed later (e.g., advanced analytics, cross-entity joins), Aurora can be introduced without changing the application data model significantly.

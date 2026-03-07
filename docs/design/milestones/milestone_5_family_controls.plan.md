@@ -77,6 +77,13 @@ Integrate Apple's FamilyControls, ManagedSettings, and DeviceActivity frameworks
 - Override flow presents challenge and responds to input
 - Re-authorization prompt appears when needed
 
+## Test Requirements (Definition of Done)
+- Unit tests for BlockingService authorization state machine (authorized, denied, revoked transitions)
+- Unit tests for shield apply/remove logic with mock ManagedSettingsStore
+- Unit tests for DeviceActivityMonitor schedule start/stop callbacks
+- Manual device test checklist: authorization flow, app shielding, schedule-based blocking, override challenge
+- Edge case tests: re-authorization after reinstall, authorization revoked handling
+
 ## Notes
 - FamilyControls **cannot** be tested in the simulator—must use a physical device
 - Apply for entitlement ASAP; build nudge/accountability fallback UI if entitlement is delayed
