@@ -4,359 +4,351 @@
 
 | | Dev A | Dev B |
 |---|-------|-------|
-| **Strengths** | AI interest, learning iOS | Backend/AWS strong, Flutter experience |
-| **Primary Track** | iOS UI + AI Features | AWS Infrastructure + Backend API |
-| **Learning Goals** | AI integration, iOS development | iOS/Swift, AI/ML integration |
-| **Git Branch** | `feature/ios-*` | `feature/backend-*` |
+| **Background** | CS background, Python, data science | Strong backend/AWS, Flutter experience |
+| **Primary Track** | Product + AI Features + iOS UI | AWS Infrastructure + Backend API + AI Integration |
+| **Learning Goals** | PM skills, AI/ML lifecycle, basic AWS | iOS/Swift, AI/ML integration, prompt engineering |
+| **Career Goal** | PM role (AI-powered products) | Full-stack + AI/ML engineering |
+| **Git Branch** | `feature/dev-a-*` | `feature/dev-b-*` |
+
+## Key Principle: Cross-Exposure
+
+Both developers get hands-on experience across ALL layers of the stack:
+
+- **Dev A** does iOS UI + AI prompt engineering + PM artifacts + basic AWS tasks (S3, DynamoDB CRUD, CloudWatch monitoring)
+- **Dev B** does AWS infra + backend APIs + AI/ML integration (Bedrock, Transcribe, Polly) + iOS features (widgets, Siri, Live Activities)
+- **AWS complexity guide for Dev A:**
+  - Suitable: S3 (file storage), DynamoDB (read/write items), CloudWatch (view logs/metrics), Cognito (understand auth flow), Pinpoint (analytics config)
+  - Too complex for now: VPC/networking, security groups, CDK, IAM policies, Lambda deployment config -- Dev B owns these
+
+---
+
+## Phase 0: Pre-Interview Sprint (March 6-17)
+
+**Dev A has a PM interview at IBM on March 17.** The IBM role focuses on AI-powered products, AI/ML lifecycle understanding, product strategy, Agile practices, responsible AI, and data-driven decision making.
+
+**This 11-day sprint front-loads work that directly maps to the IBM PM job description.** Dev A produces real PM artifacts and gets hands-on AI/ML experience they can discuss in the interview.
+
+### Dev A -- Pre-Interview Sprint (March 6-17)
+
+The goal: produce tangible artifacts and hands-on experience Dev A can speak to in the interview. Each task maps to a specific IBM PM job requirement.
+
+#### Days 1-3: Product Strategy & AI/ML Lifecycle
+
+| Task | IBM PM Skill Mapped | Deliverable |
+|------|---------------------|-------------|
+| Write PRD for AI Secretary feature | "Define product strategy aligned with user needs and business goals" | `docs/product/ai_secretary_prd.md` |
+| Document the AI/ML data lifecycle | "Understanding of AI, ML, or data lifecycle concepts" | `docs/product/ai_ml_lifecycle.md` |
+| Create user personas and journey maps | "Advocate for user experience" | Section in PRD |
+
+**PRD should include:** Problem statement, target personas, user stories (as a [role] I want [goal] so that [benefit]), success metrics, prioritized feature list with MoSCoW framework, technical constraints, competitive landscape (Opal, one sec, Fantastical, Motion).
+
+**AI/ML Lifecycle doc should cover:**
+1. **Data Collection** -- What data feeds the AI? (Calendar events, tasks, habits, blocking history, user preferences, conversation history)
+2. **Data Pipeline** -- How does data flow from user actions to the LLM context window?
+3. **Model Selection** -- Why Bedrock/Claude? Trade-offs vs GPT-4, Gemini, open-source models
+4. **Prompt Engineering** -- How system prompts shape AI behavior; iteration methodology
+5. **Inference** -- Request flow: user input -> context building -> LLM call -> action parsing
+6. **Evaluation** -- How to measure AI quality (response relevance, action accuracy, user satisfaction)
+7. **Feedback Loop** -- How user confirmations/rejections improve future responses
+8. **Monitoring** -- Token usage, latency, error rates, cost per query
+
+#### Days 3-5: Responsible AI & Sprint Planning
+
+| Task | IBM PM Skill Mapped | Deliverable |
+|------|---------------------|-------------|
+| Create Responsible AI Framework | "Incorporate responsible AI principles such as transparency, fairness, and compliance" | `docs/product/responsible_ai.md` |
+| Write Sprint Plan for Phase A | "Agile practices such as sprint planning and iterative delivery" | `docs/product/sprint_plans.md` |
+| Define product KPIs and analytics plan | "Analyze data, use product analytics tools, and interpret metrics" | `docs/product/analytics_plan.md` |
+
+**Responsible AI Framework should cover:**
+- **Transparency:** What does the AI do with user data? How do we communicate AI limitations? What happens when the AI makes a mistake? How does the user know when AI created an event vs a human?
+- **Fairness:** Does the AI gatekeeper treat all reasons equally? Are there biases in how it evaluates override requests? How do we prevent the AI from being too strict or too lenient?
+- **Privacy & Compliance:** Data minimization, user consent flows, GDPR data export/deletion, what data is sent to Bedrock vs stays on-device, retention policies (90-day TTL on conversations)
+- **Accountability:** Logging AI decisions for auditability, user ability to report bad AI behavior, human override always available (even in strict mode, with cooldown)
+
+**Sprint Plans should include:**
+- 2-week sprint breakdown for Phase A (4 sprints)
+- User stories with acceptance criteria and story points
+- Sprint goals and success criteria
+- Velocity tracking plan
+- Backlog prioritization using RICE or MoSCoW framework
+
+**Analytics Plan should include:**
+- Key metrics: DAU/MAU, focus session completion rate, AI query volume, avg session duration, premium conversion rate
+- Per-feature metrics: AI action accuracy (confirmed vs rejected), gatekeeper override rate, calendar events created by AI, habit streak retention
+- Tool: AWS Pinpoint for event tracking, CloudWatch dashboards for backend metrics
+- Review cadence: weekly metrics review, monthly product review
+
+#### Days 5-8: Hands-On AI/ML Work
+
+| Task | IBM PM Skill Mapped | Deliverable |
+|------|---------------------|-------------|
+| Write and iterate AI secretary system prompt | "Translate technical concepts into clear product requirements" | `docs/product/ai_prompts.md` + tested prompts |
+| Write AI gatekeeper prompt and test scenarios | "Translate technical concepts" + Responsible AI | Test results documented |
+| Basic AWS hands-on: S3, DynamoDB, CloudWatch | "Understanding of AI, ML, or data lifecycle concepts" (infra context) | Hands-on experience to discuss |
+
+**AI Prompt Engineering:**
+- Write the system prompt for the AI secretary (define persona, capabilities, response format, action JSON structure)
+- Write the gatekeeper prompt (what's legitimate, what's not, tone, firmness level)
+- Test both prompts using the AWS Bedrock console or a Python script calling Bedrock API
+- Document 20+ test cases with inputs and expected outputs
+- Iterate on prompts based on test results (this IS the ML lifecycle in action)
+- Document the iteration process (version 1 -> test -> issues found -> version 2 -> test -> improved)
+
+**Basic AWS Hands-On (Dev B helps set up, Dev A operates):**
+- Upload a file to S3, generate a presigned URL, download it
+- Write an item to DynamoDB, read it back, update it, delete it (basic CRUD)
+- Look at CloudWatch logs from Lambda, understand log groups and metrics
+- Navigate the Cognito console, understand user pools and tokens conceptually
+
+#### Days 8-11: Synthesis & Interview Prep
+
+| Task | IBM PM Skill Mapped | Deliverable |
+|------|---------------------|-------------|
+| Create a product pitch deck (5-7 slides) | "Communicate product vision and progress to stakeholders" | Slide deck or doc |
+| Practice articulating the AI/ML lifecycle | "Clear communication and storytelling skills" | Talking points |
+| Start iOS project setup (M1) | Technical credibility | Xcode project building |
+
+**Product Pitch Deck:**
+- Slide 1: Problem (people lose hours to phone addiction + manual schedule management)
+- Slide 2: Solution (BetterSelf -- AI-powered blocking + voice-first calendar secretary)
+- Slide 3: AI/ML Architecture (data lifecycle diagram, model choice rationale)
+- Slide 4: Responsible AI approach (transparency, fairness, compliance)
+- Slide 5: KPIs and success metrics (how we measure product-market fit)
+- Slide 6: Roadmap and sprint plan (Agile delivery approach)
+- Slide 7: Competitive advantage (AI gatekeeper concept, voice-first interaction)
+
+### Dev B -- Pre-Interview Sprint (March 6-17)
+
+While Dev A focuses on PM artifacts, Dev B starts building the foundation.
+
+| Days | Task | Details |
+|------|------|---------|
+| 1-3 | M9: CDK Foundation | VPC, subnets, security groups, base stacks |
+| 3-5 | M10: Auth Infra | Cognito user pool, identity providers |
+| 5-7 | M11: Database Setup | DynamoDB tables, Aurora cluster |
+| 7-9 | M12: Lambda + API Gateway | FastAPI project, Mangum, health check |
+| 9-11 | Help Dev A with AWS hands-on | Set up S3 bucket and DynamoDB table for Dev A to practice with. Pair on prompt testing via Bedrock console. |
+
+**Sync during this phase:** Daily 15-min standup. Dev B reviews Dev A's PM documents for technical accuracy. Dev A reviews Dev B's CDK code to learn AWS concepts.
+
+---
+
+## Phase 1: iOS App Foundation (Weeks 3-6)
+
+After the interview, both devs shift to building the product.
+
+### Dev A -- Weeks 3-6
+
+| Week | Milestone | Task | PM Angle |
+|------|-----------|------|----------|
+| 3 | M1-M2 | Project setup + data models (pair with Dev B) | Define acceptance criteria for each model |
+| 3-4 | M3 | Tab navigation + home dashboard | Write user stories first, then build |
+| 4-5 | M4 | Focus mode UI (profiles, timer, editor) | Document UX decisions and trade-offs |
+| 5-6 | M8 | AI chat UI + Apple Speech integration | Own the AI interaction design end-to-end |
+| 5-6 | -- | Basic AWS: Monitor CloudWatch logs from Dev B's APIs | Practice reading metrics, identify issues |
+
+**PM Deliverables each sprint:** Dev A writes a 1-page sprint retrospective: what shipped, what was learned, what to improve. This builds the "iterative delivery" muscle.
+
+### Dev B -- Weeks 3-6
+
+| Week | Milestone | Task | AI Angle |
+|------|-----------|------|----------|
+| 3 | M1-M2 | Project setup + data models (pair with Dev A) | -- |
+| 3-4 | M13 | AI + Voice services (Bedrock, Transcribe, Polly) | Design the AI secretary system prompt (pair with Dev A) |
+| 4-5 | M14-M15 | User API + Blocking API | -- |
+| 5-6 | M16 | Calendar API | Build AI-powered schedule optimization endpoint |
+| 5-6 | M5 | FamilyControls integration (iOS) | Cross-exposure: learn FamilyControls framework |
+
+**AI Focus:** Dev B owns the Bedrock integration end-to-end. Uses Dev A's prompt documents as the spec. Tests prompts programmatically and shares results with Dev A for product-level evaluation.
+
+### Sync Point 1 -- End of Week 4
+
+**Deliverables:**
+- Dev A: Dashboard + Focus UI built, user stories documented, sprint retro written
+- Dev B: Auth + Database + Lambda deployed, User/Blocking APIs working
+
+**Discuss:** API contract review, demo progress, Dev A's first CloudWatch walkthrough
+
+---
+
+## Phase 2: Core Features (Weeks 6-8)
+
+### Dev A -- Weeks 6-8
+
+| Week | Milestone | Task | PM/AI Angle |
+|------|-----------|------|-------------|
+| 6-7 | M6 | Calendar UI (month/week/day views) | Define calendar UX requirements doc |
+| 7 | M7 | Calendar integration (EventKit + Google) | Learn REST API integration, OAuth concepts |
+| 7-8 | M8 | AI chat (continued) -- action confirmations, conversation history | Own the AI conversation UX, test prompt quality |
+| 7-8 | -- | Basic AWS: Write blocking session data to DynamoDB via a simple Python script | Hands-on data pipeline experience |
+
+### Dev B -- Weeks 6-8
+
+| Week | Milestone | Task | AI Angle |
+|------|-----------|------|----------|
+| 6-7 | M17 | AI Secretary API (core AI endpoint) | Build context builder, action parser, Bedrock orchestration |
+| 7 | M18 | Voice Processing API (Transcribe -> Bedrock -> Polly) | End-to-end voice AI pipeline |
+| 7-8 | M19 | Tasks + Habits API | Build AI-powered task prioritization |
+| 8 | M20 | Push Notifications (SNS + EventBridge) | Daily briefing AI generation |
+
+### Sync Point 2 -- End of Week 7
+
+**Deliverables:**
+- Dev A: All iOS UI screens built, calendar integration working
+- Dev B: All backend APIs deployed, AI secretary responding to prompts
+
+**Discuss:** First end-to-end test (Dev A's app hits Dev B's APIs), AI prompt quality review together, scope check
+
+---
+
+## Phase 3: Integration (Weeks 8-10)
+
+Both devs work more closely together in this phase.
+
+### Dev A -- Weeks 8-10
+
+| Week | Milestone | Task | PM/AI/AWS Angle |
+|------|-----------|------|-----------------|
+| 8 | M21 | Auth integration (Cognito SDK in Swift) | Understand auth architecture by implementing it |
+| 8-9 | M22 | API client + offline sync engine | Learn about data synchronization patterns |
+| 9 | M23 | AI integration (connect chat to Bedrock via backend) | Test AI quality in production context, log issues |
+| 9-10 | M29 | Onboarding flow | Own the onboarding UX -- this is product strategy work |
+| 10 | -- | AWS: Set up Pinpoint analytics events from iOS | Track the KPIs defined in analytics plan |
+
+### Dev B -- Weeks 8-10
+
+| Week | Milestone | Task | iOS/AI Angle |
+|------|-----------|------|--------------|
+| 8-9 | M24-M25 | Blocking sync + Calendar sync (help Dev A) | Pair on complex sync logic |
+| 9 | M26 | iOS Widgets (WidgetKit) | Learn SwiftUI in an isolated context |
+| 9-10 | M27 | Live Activities (lock screen timer) | ActivityKit -- another good iOS learning task |
+| 10 | M28 | Siri Shortcuts (App Intents) | AI-adjacent: voice command -> action mapping |
+
+### Sync Point 3 -- End of Week 9
+
+**Deliverables:**
+- Full app connected to backend, all features work end-to-end
+- Dev A has Pinpoint analytics sending events
+
+**Discuss:** Full device walkthrough, offline testing, AI gatekeeper testing, analytics data review
+
+---
+
+## Phase 4: Polish & Launch (Weeks 10-12)
+
+### Dev A -- Weeks 10-12
+
+| Week | Milestone | Task | PM Angle |
+|------|-----------|------|----------|
+| 10 | M30 | Polish + accessibility | Own accessibility requirements (VoiceOver, Dynamic Type) |
+| 10-11 | M31 | Testing (iOS) -- XCTest, XCUITest | Write test cases from user stories |
+| 11 | -- | Product: Write App Store listing copy | Product marketing -- storytelling |
+| 11-12 | M32 | App Store submission | Manage the launch checklist |
+| 12 | -- | Product: Post-launch metrics review plan | Define what success looks like week 1, month 1 |
+
+### Dev B -- Weeks 10-12
+
+| Week | Milestone | Task |
+|------|-----------|------|
+| 10 | M31 | Testing (backend) -- pytest, integration tests |
+| 10-11 | -- | CloudWatch dashboards, alarms, Bedrock cost monitoring |
+| 11 | -- | Security review: IAM roles, rate limiting, encryption audit |
+| 11-12 | M32 | Production deploy, SSL, domain, scaling config |
+
+### Sync Point 4 -- End of Week 11
+
+Feature freeze. TestFlight beta. Final testing. Submit to App Store.
+
+---
+
+## Dev A -- PM Artifacts Summary
+
+All PM deliverables Dev A produces during the project (great for portfolio and interview talking points):
+
+| Document | IBM PM Skill | When |
+|----------|-------------|------|
+| `docs/product/ai_secretary_prd.md` | Product strategy, user needs, backlog management | Pre-interview (Days 1-3) |
+| `docs/product/ai_ml_lifecycle.md` | AI/ML data lifecycle understanding | Pre-interview (Days 1-3) |
+| `docs/product/responsible_ai.md` | Responsible AI principles (transparency, fairness, compliance) | Pre-interview (Days 3-5) |
+| `docs/product/sprint_plans.md` | Agile sprint planning, story points, velocity | Pre-interview (Days 3-5) |
+| `docs/product/analytics_plan.md` | Product analytics, KPIs, data-driven decisions | Pre-interview (Days 3-5) |
+| `docs/product/ai_prompts.md` | Translating ML concepts into product requirements | Pre-interview (Days 5-8) |
+| Product pitch deck | Stakeholder communication, storytelling | Pre-interview (Days 8-11) |
+| Sprint retrospectives (x6) | Iterative delivery, continuous improvement | Every 2 weeks during build |
+| App Store listing copy | Product marketing and positioning | Week 11 |
+| Post-launch metrics plan | Analytics interpretation, product outcomes | Week 12 |
+
+---
+
+## Dev B -- AI/ML Exposure Summary
+
+AI/ML work Dev B owns or co-owns during the project:
+
+| Task | AI/ML Skill | When |
+|------|------------|------|
+| Bedrock model setup + invocation code | LLM API integration | Weeks 3-4 (M13) |
+| AI secretary system prompt design | Prompt engineering | Weeks 3-4 (pair with Dev A) |
+| AI gatekeeper prompt + evaluation logic | Responsible AI implementation | Weeks 4-5 (pair with Dev A) |
+| Context builder (schedule + tasks + history -> prompt) | Data pipeline for AI | Weeks 6-7 (M17) |
+| Action parser (LLM response -> structured JSON -> execution) | AI output structuring | Weeks 6-7 (M17) |
+| Voice pipeline (Transcribe -> Bedrock -> Polly) | Multi-modal AI pipeline | Week 7 (M18) |
+| AI-powered task prioritization | ML-informed features | Week 7-8 (M19) |
+| Daily briefing generation | AI content generation | Week 8 (M20) |
+| Schedule optimization via Bedrock | AI-powered decision making | Week 6-7 (M16) |
+| Siri -> AI command mapping | Voice AI integration | Week 10 (M28) |
+
+---
+
+## AWS Exposure for Dev A
+
+Entry-level AWS tasks throughout the project (with Dev B's guidance):
+
+| Task | AWS Service | Complexity | When |
+|------|------------|------------|------|
+| Upload/download files, generate presigned URL | S3 | Beginner | Pre-interview (Days 5-8) |
+| Write/read/update items in a table | DynamoDB | Beginner | Pre-interview (Days 5-8) |
+| View Lambda logs, understand log groups | CloudWatch | Beginner | Weeks 5-6 |
+| Understand user pools, tokens, auth flow | Cognito | Conceptual | Weeks 3-4 |
+| Configure event tracking from iOS | Pinpoint | Beginner | Weeks 9-10 |
+| View API Gateway request logs | CloudWatch | Beginner | Weeks 8-9 |
+| Navigate the AWS Console, understand regions/services | General | Beginner | Throughout |
+
+**Not for Dev A (too complex):** VPC configuration, security groups, CDK/IaC, IAM policies, Lambda deployment, NAT gateways, Aurora cluster management
+
+---
 
 ## Collaboration Approach
 
 - **Branching:** Feature branches off `develop`, merged via pull requests
 - **Code Reviews:** Every PR requires review from the other developer
-- **Sync Points:** 6 scheduled checkpoints where both developers sync, review progress, and agree on next steps
-- **API Contract First:** Before building endpoints or clients, both agree on request/response shapes in a shared API spec
-- **Shared Resources:** Both devs pair on Milestones 1-2 (project bootstrap) and Milestones 31-32 (testing + launch)
+- **Sync Points:** 4 scheduled checkpoints (reduced from 6 to match compressed timeline)
+- **API Contract First:** Both agree on endpoint shapes before building (see `docs/design/api_contract.md`)
+- **Daily:** 15-min async standup (what I did, what I'm doing, blockers)
+- **Weekly:** 30-min video call to demo, review, and plan
+- **PR Reviews:** Review within 24 hours. Dev B gives iOS architecture feedback to Dev A. Dev A gives product/UX feedback to Dev B.
 
 ---
 
-## Timeline Overview (12 Weeks)
-
-```
-Week:  1    2    3    4    5    6    7    8    9    10   11   12
-       |    |    |    |    |    |    |    |    |    |    |    |
-Dev A: [--Bootstrap--][---iOS UI---][--AI Chat--][Integration][Widgets+Polish][Test+Launch]
-Dev B: [--Bootstrap--][--AWS Infra-][--Backend API----------][iOS Learn+Int][Test+Launch]
-       |         |         |              |              |              |
-      SP1       SP2       SP3            SP4            SP5           SP6
-```
-
-**SP = Sync Point**
-
----
-
-## Sync Points
-
-### Sync Point 1 -- Project Bootstrap (End of Week 1)
-
-**When:** End of Week 1
-**Duration:** 2-3 hours together
-**Purpose:** Both developers start together to establish foundations
-
-**Deliverables before sync:**
-- [x] Xcode project created and building (pair together)
-- [x] SwiftData models defined (pair together)
-- [x] Mock data service working
-- [x] Git repo configured with `main` and `develop` branches
-- [x] CDK project initialized (Dev B starts)
-
-**Discuss at sync:**
-- Review data models -- do they cover all use cases?
-- Agree on coding conventions (Swift style, Python style)
-- Set up PR template and review expectations
-- Dev B walks Dev A through the AWS architecture diagram
-- Divide Week 2-3 milestones explicitly
-
----
-
-### Sync Point 2 -- API Contract Agreement (End of Week 3)
-
-**When:** End of Week 3
-**Duration:** 3-4 hours together
-**Purpose:** Agree on every API endpoint shape before building clients or servers
-
-**Deliverables before sync:**
-- Dev A: Tab navigation + home dashboard built (M3), focus mode UI started (M4)
-- Dev B: CDK foundation deployed (M9), Cognito configured (M10), databases deployed (M11), Lambda + API Gateway health check working (M12)
-
-**Discuss at sync:**
-- Walk through and finalize the API contract document (see below)
-- Agree on authentication flow (Cognito token format, header conventions)
-- Agree on error response format
-- Dev A demos the iOS UI progress
-- Dev B demos the deployed infrastructure (health check, Cognito sign-up)
-- Identify blockers or scope adjustments
-
-**Key Artifact:** Create `docs/api_contract.md` with every endpoint, request/response shape, and status codes. Both developers sign off. Example:
-
-```
-POST /ai/chat
-Authorization: Bearer <cognito-jwt>
-Request:  { "message": "Schedule gym 3 times this week" }
-Response: { "id": "...", "text": "I'll schedule...", "action": { "type": "create_event", ... }, "confirmed": false }
-```
-
----
-
-### Sync Point 3 -- Mock API + Core UI Checkpoint (End of Week 5)
-
-**When:** End of Week 5
-**Duration:** 2-3 hours together
-**Purpose:** Dev B has core APIs deployed, Dev A has all major UI screens
-
-**Deliverables before sync:**
-- Dev A: Focus UI complete (M4), FamilyControls integrated (M5), calendar UI built (M6), AI chat UI with mock responses (M8 started)
-- Dev B: User/Auth API (M14), Blocking API (M15), Calendar API started (M16), AI/Voice services configured (M13)
-
-**Discuss at sync:**
-- Dev A tests against Dev B's deployed staging APIs (first real connection test)
-- Identify API contract mismatches and fix them
-- Dev B reviews Dev A's iOS code -- suggest improvements
-- Dev A walks Dev B through FamilyControls integration (complex area)
-- Plan the AI prompt engineering together (shared interest)
-- Discuss: is Aurora needed or can DynamoDB handle everything for MVP?
-
----
-
-### Sync Point 4 -- Core Features Complete (End of Week 7)
-
-**When:** End of Week 7
-**Duration:** 3-4 hours together
-**Purpose:** All core features built (separately), ready to integrate
-
-**Deliverables before sync:**
-- Dev A: Calendar integration working (M7), AI chat UI + Apple Speech complete (M8), all iOS screens functional with mock data
-- Dev B: All backend APIs complete (M14-20), AI secretary responding to prompts via Bedrock, push notifications configured
-
-**Discuss at sync:**
-- End-to-end demo: Dev A runs app, Dev B monitors backend logs
-- Test each API endpoint with real iOS requests
-- Review AI secretary prompt -- test various commands together, refine
-- Plan integration milestones (M21-25): who does what
-- Dev B starts learning iOS by picking up a small feature (Siri Shortcuts M28 is a good starter)
-
-**Key Artifact:** Record a list of all issues/bugs found during the end-to-end test
-
----
-
-### Sync Point 5 -- Integration Complete (End of Week 9)
-
-**When:** End of Week 9
-**Duration:** 3-4 hours together
-**Purpose:** App is fully connected to backend, all features work end-to-end
-
-**Deliverables before sync:**
-- Dev A: Auth integration (M21), API client + sync (M22), AI integration (M23), blocking sync (M24), calendar sync (M25)
-- Dev B: Widgets (M26), Live Activities (M27), Siri Shortcuts (M28) -- Dev B's iOS learning milestones, with code review from Dev A
-
-**Discuss at sync:**
-- Full app walkthrough on a real device
-- Test offline mode: airplane mode, queue operations, reconnect
-- Test edge cases together: expired tokens, network errors, calendar conflicts
-- Test AI gatekeeper flow with various override reasons
-- Plan onboarding flow content and copy
-- Decide: what needs polish vs what's good enough for MVP?
-- Begin writing test cases for M31
-
----
-
-### Sync Point 6 -- Feature Freeze + Launch Prep (End of Week 11)
-
-**When:** End of Week 11
-**Duration:** Full day together
-**Purpose:** Feature freeze, testing, and App Store preparation
-
-**Deliverables before sync:**
-- Dev A: Onboarding flow (M29), polish + accessibility (M30)
-- Dev B: Backend tests complete, monitoring dashboards set up
-- Both: Unit tests + UI tests (M31)
-
-**Discuss at sync:**
-- Final full app test on multiple devices (iPhone SE, iPhone 16 Pro Max)
-- Accessibility audit (VoiceOver, Dynamic Type)
-- Review App Store listing copy
-- Submit FamilyControls entitlement request (if not already done)
-- Deploy to TestFlight, invite beta testers
-- Create launch checklist
-- Submit to App Store (M32)
-
----
-
-## Dev A Roadmap -- iOS UI + AI Features
-
-### Week 1: Bootstrap (with Dev B)
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M1 | Pair: Project Setup | Create Xcode project together, set up design system, add SPM dependencies |
-| M2 | Pair: Data Models | Define SwiftData models together, create mock data service |
-
-**Learning focus:** SwiftUI basics, Xcode navigation, Swift syntax
-
-### Weeks 2-3: iOS UI Screens
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M3 | Tab Navigation + Dashboard | Build 3-tab layout, home dashboard with summary cards, settings shell |
-| M4 | Focus Mode UI | Profile list, profile editor, timer screen, focus history |
-
-**Learning focus:** SwiftUI layouts (VStack, HStack, ScrollView, NavigationStack), @Observable pattern
-
-### Weeks 3-5: Core iOS Features
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M5 | FamilyControls | Integrate FamilyControls authorization, app picker, shield configuration (complex -- ask Dev B for help if stuck) |
-| M6 | Calendar UI | Month/week/day views, event creation form |
-| M8 | AI Chat UI + Voice | Push-to-talk interface, Apple Speech integration, voice waveform, conversation history, mock AI responses |
-
-**Learning focus:** System frameworks (FamilyControls, EventKit, Speech), async/await, Combine
-
-### Weeks 5-7: Calendar + AI Polish
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M7 | Calendar Integration | EventKit for Apple Calendar, Google Calendar REST API, sync engine |
-| M8 | AI Chat (continued) | Refine voice UX, action confirmation cards, conversation persistence |
-| -- | AI Prompts | Work with Dev B on AI secretary system prompt and gatekeeper prompt |
-
-**Learning focus:** REST API integration, OAuth flows, AI prompt engineering
-
-### Weeks 7-9: Integration
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M21 | Auth Integration | Connect Cognito SDK, sign-in/sign-up flows, token management |
-| M22 | API Client + Sync | Build Swift API client, offline queue, background sync |
-| M23 | AI Integration | Connect voice chat to backend AI, streaming responses, action confirmations |
-| M24 | Blocking Sync | Sync blocking profiles/sessions with backend |
-| M25 | Calendar Sync | Two-way calendar sync with conflict resolution |
-
-**Learning focus:** Networking (URLSession/Alamofire), Cognito SDK, background tasks
-
-### Weeks 9-11: Onboarding + Polish
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M29 | Onboarding Flow | Guided setup screens (goals, schedule, apps, calendar, AI intro) |
-| M30 | Polish + Accessibility | Animations, haptics, VoiceOver, Dynamic Type, dark mode |
-| M31 | Testing (iOS) | XCTest unit tests, XCUITest UI tests |
-
-**Learning focus:** Accessibility APIs, animation, XCTest
-
-### Weeks 11-12: Launch
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M31 | TestFlight | Distribute beta build, collect feedback |
-| M32 | App Store Submission | Screenshots, listing, FamilyControls entitlement, submit for review |
-
----
-
-## Dev B Roadmap -- Backend + AWS (then iOS)
-
-### Week 1: Bootstrap (with Dev A)
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M1 | Pair: Project Setup | Help set up Xcode project, contribute to design system |
-| M2 | Pair: Data Models | Define SwiftData models together, ensure alignment with backend schemas |
-| M9 | AWS CDK Foundation | Initialize CDK project, deploy VPC, subnets, security groups |
-
-**Learning focus:** Swift/SwiftUI basics (leverage Flutter knowledge), CDK project structure
-
-### Weeks 2-3: AWS Infrastructure
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M10 | Auth Infrastructure | Cognito user pool, Apple + Google identity providers, API Gateway + authorizer |
-| M11 | Database Setup | DynamoDB tables, Aurora Serverless v2 (if needed), CDK definitions |
-| M12 | Lambda + API Gateway | FastAPI project, Mangum adapter, deploy pipeline, health check |
-
-**Learning focus:** Cognito configuration, CDK patterns, FastAPI + Lambda
-
-### Weeks 3-5: AI Services + First APIs
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M13 | AI + Voice Services | Bedrock integration, Transcribe + Polly setup, AI secretary system prompt |
-| M14 | User + Auth API | Registration, profile CRUD, subscription endpoints |
-| M15 | Blocking Rules API | Blocking profile CRUD, session logging, stats aggregation |
-
-**Learning focus:** Bedrock API, prompt engineering, AI/ML integration
-
-### Weeks 5-7: Core Backend APIs
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M16 | Calendar API | Event CRUD, sync endpoints, conflict detection, AI optimization |
-| M17 | AI Secretary API | Chat endpoint, context building, action parsing, daily briefing generation |
-| M18 | Voice Processing API | Audio upload -> Transcribe -> Bedrock -> Polly pipeline |
-| M19 | Tasks + Habits API | Task CRUD, habit tracking, streak calculation |
-| M20 | Push Notifications | SNS + APNs, daily briefing scheduler, focus reminders |
-
-**Learning focus:** AI conversation design, voice pipeline optimization, EventBridge scheduling
-
-### Weeks 7-9: iOS Learning + Support Integration
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M26 | iOS Widgets | WidgetKit implementation (good starter iOS task -- isolated, well-documented) |
-| M27 | Live Activities | Focus timer on lock screen + Dynamic Island |
-| M28 | Siri Shortcuts | App Intents for voice commands |
-| -- | Support Dev A | Help debug integration issues, review PRs, pair on complex problems |
-
-**Learning focus:** WidgetKit, ActivityKit, App Intents -- self-contained iOS features good for learning Swift
-
-### Weeks 9-11: Testing + Monitoring
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M31 | Testing (Backend) | pytest unit tests, integration tests, load testing |
-| -- | Monitoring | CloudWatch dashboards, alarms for errors/latency, Bedrock token usage tracking |
-| -- | Security Review | Review IAM roles, API rate limiting, data encryption |
-
-**Learning focus:** Testing patterns, observability, production readiness
-
-### Weeks 11-12: Launch
-
-| Milestone | Task | Details |
-|-----------|------|---------|
-| M31 | TestFlight Support | Monitor backend during beta testing, fix issues |
-| M32 | Launch Prep | Production CDK deploy, SSL, domain setup, scaling configuration |
-
----
-
-## Shared Milestones (Pair Together)
-
-These milestones benefit from both developers working together:
-
-| Milestone | Why Pair |
-|-----------|----------|
-| M1-M2 (Setup + Models) | Establish shared foundations, coding style, data model agreement |
-| API Contract (SP2) | Both must agree on every endpoint shape |
-| M17 (AI Secretary Prompt) | Both interested in AI -- design the prompt together |
-| AI Gatekeeper Logic | Both interested in AI -- define what's "legitimate" together |
-| M31-M32 (Test + Launch) | Both needed for comprehensive testing and launch prep |
-
----
-
-## Risk Mitigation for Parallel Work
+## Risk Mitigation
 
 | Risk | Mitigation |
 |------|-----------|
-| API contract mismatch | Create `docs/api_contract.md` at SP2, update it as APIs evolve. Both devs sign off on changes. |
-| Dev A blocked on complex iOS feature | Dev B available for pairing (has Flutter context). Schedule 30-min daily standups. |
-| Dev B's iOS code quality (learning) | Dev A reviews all iOS PRs. Start with isolated features (widgets, Siri). |
-| Merge conflicts | Keep clear ownership boundaries. Use feature branches. Sync develop branch at every SP. |
-| One track falls behind | Each SP includes a scope check. Cut non-essential features (analytics, meeting prep) if behind. |
-| FamilyControls entitlement delayed | Apply in Week 1. Build nudge/accountability mode as fallback (doesn't need entitlement). |
-
----
-
-## Daily / Weekly Rituals
-
-- **Daily:** 15-min async standup (Slack/Discord message: what I did, what I'm doing, blockers)
-- **Weekly:** 30-min video call to review progress, demo features, discuss upcoming work
-- **Sync Points:** Longer in-person or video sessions (2-4 hours) as described above
-- **PR Reviews:** Review within 24 hours. Use comments for learning, not just approval.
+| Dev A's interview prep takes away from project time | Pre-interview artifacts ARE project deliverables (PRD, lifecycle doc, prompts). No wasted effort. |
+| API contract mismatch | Create `docs/design/api_contract.md` at SP1, both sign off on changes. |
+| Dev A blocked on complex iOS | Dev B pairs on hard tasks (FamilyControls, calendar sync). |
+| Dev B's iOS learning curve | Start with isolated WidgetKit/Siri tasks. Dev A reviews PRs. |
+| Cross-exposure slows velocity | Limit cross-tasks to 20% of each sprint. Core track is primary. |
+| Falling behind schedule | Each sync point includes scope check. Cut: meeting prep, advanced analytics, Apple Watch. Keep: blocking, AI chat, calendar. |
+| FamilyControls entitlement delayed | Apply in Week 1. Build nudge UI as fallback. |
 
 ---
 
 ## Definition of Done (per milestone)
 
-A milestone is "done" when:
 1. All planned features work as described in the milestone file
 2. Code is merged to `develop` via reviewed PR
 3. No known crashes or critical bugs
 4. Milestone file status updated to "Completed" with "What Was Built" section
 5. Any deviations from the plan documented in the milestone's "Notes" section
+6. **Dev A additionally:** Sprint retro written, user stories documented
