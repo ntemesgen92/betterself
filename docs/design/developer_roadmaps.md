@@ -22,13 +22,13 @@ Both developers get hands-on experience across ALL layers of the stack:
 
 ---
 
-## Phase 0: Pre-Interview Sprint (March 6-17)
+## Phase 0: Pre-Interview Sprint (11-day)
 
-**Dev A has a PM interview at IBM on March 17.** The IBM role focuses on AI-powered products, AI/ML lifecycle understanding, product strategy, Agile practices, responsible AI, and data-driven decision making.
+**Dev A has a PM interview (e.g. IBM) at the end of this sprint.** The IBM role focuses on AI-powered products, AI/ML lifecycle understanding, product strategy, Agile practices, responsible AI, and data-driven decision making.
 
 **This 11-day sprint front-loads work that directly maps to the IBM PM job description.** Dev A produces real PM artifacts and gets hands-on AI/ML experience they can discuss in the interview.
 
-### Dev A -- Pre-Interview Sprint (March 6-17)
+### Dev A -- Pre-Interview Sprint
 
 The goal: produce tangible artifacts and hands-on experience Dev A can speak to in the interview. Each task maps to a specific IBM PM job requirement.
 
@@ -118,7 +118,7 @@ The goal: produce tangible artifacts and hands-on experience Dev A can speak to 
 - Slide 6: Roadmap and sprint plan (Agile delivery approach)
 - Slide 7: Competitive advantage (AI gatekeeper concept, voice-first interaction)
 
-### Dev B -- Pre-Interview Sprint (March 6-17)
+### Dev B -- Pre-Interview Sprint
 
 While Dev A focuses on PM artifacts, Dev B starts building the foundation.
 

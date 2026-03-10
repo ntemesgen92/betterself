@@ -7,7 +7,7 @@
 
 ---
 
-## Sprint 0: Pre-Interview Sprint (March 6-17)
+## Sprint 0: Pre-Interview Sprint (11-day)
 
 **Goal:** Produce PM artifacts and gain hands-on AI/ML experience
 
