@@ -43,8 +43,7 @@ General productivity-focused users -- professionals, students, entrepreneurs, an
 | Backend | Python (FastAPI) on AWS Lambda | Fast development, great AI library ecosystem |
 | API Layer | API Gateway + Lambda (Mangum adapter) | Serverless, scales automatically |
 | Auth | AWS Cognito | Supports email/password + Apple + Google sign-in |
-| Database (sessions/real-time) | DynamoDB | User sessions, blocking rules, AI conversation history |
-| Database (structured) | Aurora Serverless v2 (PostgreSQL) | Calendar events, analytics, user profiles (NOTE: final choice to be revisited during infrastructure milestone) |
+| Database | RDS PostgreSQL (free tier) + RDS Proxy | All data in PostgreSQL. Single relational database avoids future migration when analytics, social features, and calendar recurrence require JOINs/aggregations. RDS Proxy handles Lambda connection pooling. |
 | AI/LLM | AWS Bedrock (Claude/Titan) | Managed, stays in AWS, flexible model choice |
 | Push Notifications | AWS SNS + APNs | Daily briefings, schedule reminders |
 | Analytics | AWS Pinpoint | In-ecosystem, user engagement tracking |
@@ -59,24 +58,21 @@ General productivity-focused users -- professionals, students, entrepreneurs, an
 
 > Generated from `diagrams/data_models.py`. To regenerate: `cd docs/design/diagrams && python3 data_models.py`
 
-### DynamoDB Tables
+### PostgreSQL Schema (RDS Free Tier + RDS Proxy)
 
-| Table | Partition Key | Sort Key | Purpose |
-|-------|--------------|----------|---------|
-| Users | user_id | - | User profiles, preferences, subscription status |
-| BlockingProfiles | user_id | profile_id | Blocking rules and schedules |
-| BlockingSessions | user_id | start_time | Focus session history and analytics |
-| AIConversations | user_id | timestamp | Conversation history with the AI |
+> **Decision:** All data lives in a single RDS PostgreSQL instance with RDS Proxy for Lambda connection pooling. PostgreSQL was chosen over DynamoDB to avoid a future migration when analytics, social features, and calendar recurrence require relational queries (JOINs, aggregations, full-text search). RDS free tier (db.t3.micro, 12 months) keeps MVP cost low. RDS Proxy (~$15/month) eliminates Lambda connection exhaustion issues.
 
-### Aurora PostgreSQL Tables
-
-| Table | Purpose |
-|-------|---------|
-| calendar_events | Synced calendar events with recurrence support |
-| tasks | Task management with priority and status |
-| habits | Habit definitions and tracking data |
-| daily_briefings | Generated daily summaries |
-| analytics | Aggregated usage analytics for insights |
+| Table | Key Columns | Indexes | Purpose |
+|-------|------------|---------|---------|
+| users | id (UUID PK), email, cognito_sub, preferences (JSONB), subscription_status | UNIQUE on email, INDEX on cognito_sub | User profiles, preferences, subscription status |
+| blocking_profiles | id (UUID PK), user_id (FK), name, app_tokens (JSONB), schedule (JSONB), is_active | INDEX on user_id | Blocking rules and schedules |
+| blocking_sessions | id (UUID PK), user_id (FK), profile_id (FK), start_time, end_time, duration_seconds, was_overridden | INDEX on (user_id, start_time), INDEX on profile_id | Focus session history and analytics |
+| ai_conversations | id (UUID PK), user_id (FK), conversation_id, messages (JSONB), tokens_used, created_at | INDEX on (user_id, created_at), INDEX on conversation_id | Conversation history with the AI |
+| calendar_events | id (UUID PK), user_id (FK), external_id, source, title, start_time, end_time, recurrence_rule, is_ai_created, sync_metadata (JSONB) | INDEX on (user_id, start_time), INDEX on (user_id, source) | Synced calendar events with recurrence support |
+| tasks | id (UUID PK), user_id (FK), title, description, priority, status, due_date, ai_suggested | INDEX on (user_id, status, due_date), INDEX on (user_id, priority) | Task management with priority and status |
+| habits | id (UUID PK), user_id (FK), name, frequency, current_streak, longest_streak, last_check_in | INDEX on user_id | Habit definitions and tracking data |
+| habit_check_ins | id (UUID PK), habit_id (FK), user_id (FK), checked_in_at | INDEX on (habit_id, checked_in_at) | Individual habit check-in records for streak calculation |
+| daily_briefings | id (UUID PK), user_id (FK), briefing_date (DATE), content (JSONB), created_at | UNIQUE on (user_id, briefing_date) | Generated daily summaries |
 
 ---
 
@@ -238,17 +234,29 @@ The AI analyzes the user's calendar to:
 |---------|-------------|
 | Lambda | ~$0-5 (free tier) |
 | API Gateway | ~$0-3 |
-| DynamoDB | ~$0-5 (on-demand) |
-| Aurora Serverless v2 | ~$15-50 (scales to near-zero) |
+| RDS PostgreSQL | $0 (free tier db.t3.micro, 12 months) |
+| RDS Proxy | ~$15/month |
 | Bedrock | ~$10-50 (usage dependent) |
 | Cognito | Free (up to 50k MAU) |
 | Pinpoint | ~$0-5 |
 | S3 | ~$0-1 |
-| **Total** | **~$25-120/month** |
+| **Total** | **~$25-80/month** |
+
+> After 12-month free tier expires, RDS db.t4g.micro adds ~$12/month, bringing total to ~$37-92/month.
 
 ---
 
 ## Development Phases & Milestones
+
+### Phase 0: Pre-Development (Day 1)
+
+Before any code is written, these **blocking items** must be completed:
+
+| Action | Owner | Why |
+|--------|-------|-----|
+| Submit Google Cloud Console OAuth consent screen for verification | Dev B | Google's security review takes 4-6 weeks. Starting Day 1 avoids blocking M7 calendar integration. |
+| Apply for FamilyControls entitlement | Dev A | Apple's approval process is unpredictable. Early application gives maximum buffer. |
+| Create shared `develop` branch, CI pipeline, and PR templates | Dev B | Ensures both developers can work in parallel from Day 1. |
 
 ### Phase A: iOS App Foundation (Weeks 1-4)
 
@@ -269,7 +277,7 @@ The AI analyzes the user's calendar to:
 |---|-----------|-------------|----------|
 | 9 | AWS CDK Foundation | VPC, subnets, security groups, base CDK stacks | 2 days |
 | 10 | Auth Infrastructure | Cognito user pool (email + Apple + Google), API Gateway with Cognito authorizer | 2 days |
-| 11 | Database Setup | DynamoDB tables + Aurora Serverless v2 cluster, CDK definitions | 2 days |
+| 11 | Database Setup | RDS PostgreSQL instance, RDS Proxy, Secrets Manager, Alembic migrations, CDK definitions | 2 days |
 | 12 | Lambda & API Gateway | FastAPI project structure, Mangum adapter, deploy pipeline, health checks | 2 days |
 | 13 | AI & Voice Services | Bedrock integration, Transcribe + Polly setup, prompt engineering for secretary persona | 3 days |
 
@@ -304,8 +312,25 @@ The AI analyzes the user's calendar to:
 | 28 | Siri Shortcuts | App Intents for "schedule event", "start focus", "what's my day look like" | 2 days |
 | 29 | Onboarding Flow | Guided setup screens (goals, schedule, app selection, calendar connection, AI introduction) | 3 days |
 | 30 | Polish & Accessibility | Animations, haptics, VoiceOver support, Dynamic Type, edge cases | 3 days |
-| 31 | Testing & QA | Unit tests, UI tests, integration tests, TestFlight beta | 3 days |
+| 31 | Integration Testing & Beta | **Integration/E2E tests only** (unit tests already written per-milestone). Cross-system flow verification, TestFlight beta distribution. | 3 days |
 | 32 | App Store Submission | Screenshots, App Store listing, privacy policy, FamilyControls entitlement application, review submission | 3 days |
+
+---
+
+## Scope-Cut Triggers
+
+If the team falls behind schedule, cut features in this order (lowest impact first). Every sync point (see `developer_roadmaps.md`) includes a scope check against these triggers.
+
+| Priority | Feature to Cut | Trigger | Impact on MVP |
+|----------|---------------|---------|---------------|
+| Cut first | M27: Live Activities | >3 days behind at Phase D sync | Nice-to-have. Lock screen timer is polish, not core. |
+| Cut second | M26: iOS Widgets | >5 days behind at Phase D sync | Users can still access everything from the app itself. |
+| Cut third | M28: Siri Shortcuts | >5 days behind at Phase E start | Voice interaction still works in-app via push-to-talk. |
+| Cut fourth | Meeting prep (in M17) | AI Sprint planning shows complexity | Strip from AI action parser. Daily briefing + scheduling covers 90% of value. |
+| Cut fifth | Advanced analytics (in M19) | Backend Sprint 3 overflows | Basic streak/count is enough for launch. Rich charts are post-MVP. |
+| **Never cut** | App blocking (M4-M5) | -- | Core value prop #1. |
+| **Never cut** | AI chat + calendar actions (M8, M17, M23) | -- | Core value prop #2. |
+| **Never cut** | Calendar sync (M7, M25) | -- | Required for AI to be useful. |
 
 ---
 
@@ -414,6 +439,11 @@ backend/
 ├── api/
 │   ├── main.py
 │   ├── requirements.txt
+│   ├── alembic.ini
+│   ├── migrations/
+│   │   ├── env.py
+│   │   └── versions/
+│   │       └── 001_initial_schema.py
 │   ├── routers/
 │   │   ├── auth.py
 │   │   ├── users.py
@@ -424,15 +454,21 @@ backend/
 │   │   ├── tasks.py
 │   │   └── habits.py
 │   ├── models/
+│   │   ├── base.py
 │   │   ├── user.py
 │   │   ├── blocking.py
 │   │   ├── calendar.py
+│   │   ├── task.py
+│   │   ├── habit.py
 │   │   └── ai.py
 │   ├── services/
 │   │   ├── ai_service.py
 │   │   ├── calendar_service.py
 │   │   ├── voice_service.py
 │   │   └── notification_service.py
+│   ├── db/
+│   │   ├── session.py
+│   │   └── repository.py
 │   └── utils/
 │       ├── auth.py
 │       └── config.py
@@ -447,8 +483,9 @@ backend/
 |------|--------|-----------|
 | FamilyControls entitlement approval delayed | Cannot ship app blocking | Apply during Phase A. Build accountability/nudge UI as fallback. |
 | Voice latency (AWS round-trip 3-5s) | Poor UX for voice interaction | Use Apple Speech on-device for transcription, send text to Bedrock, Polly only for response. Show "thinking" animation. |
-| Google Calendar OAuth verification | Cannot integrate Google Calendar | Start Google Cloud Console verification early (can take weeks). Ship with Apple Calendar first if delayed. |
-| Database choice uncertainty | Over/under-engineering data layer | Start with DynamoDB only for MVP. Add Aurora only if complex relational queries emerge. Revisit in Milestone 11. |
+| Google Calendar OAuth verification delay | Google security review can take 4-6 weeks. If started late, blocks calendar integration. | **Start OAuth consent screen verification on Day 1 of Phase 0.** Submit with screenshots and description immediately. Ship with Apple Calendar only if Google verification is delayed. |
+| RDS free tier expiry (12 months) | Cost increases by ~$12/month after free tier ends | Plan for db.t4g.micro ($12/month) or evaluate Aurora Serverless v2 if traffic justifies auto-scaling at that point. |
+| Lambda connection exhaustion | Lambda cold starts can exhaust PostgreSQL connection limit | RDS Proxy pools connections -- handles this automatically. Monitor CloudWatch `DatabaseConnections` metric. |
 | Bedrock model availability/cost | AI features too expensive | Implement token budgeting per user tier. Use smaller models for simple actions, larger for complex reasoning. |
 | App Store review rejection | Launch delay | Review Apple's guidelines early, especially for FamilyControls. Prepare appeals documentation. |
 
@@ -460,7 +497,7 @@ backend/
 - Cognito handles auth tokens; refresh tokens stored in iOS Keychain
 - Calendar data: user explicitly grants EventKit permission; Google Calendar uses OAuth scopes limited to calendar read/write
 - FamilyControls: user must explicitly authorize; app cannot access which specific apps are installed, only shield selected categories/apps
-- AI conversations: stored in DynamoDB with user_id partition; users can delete conversation history
+- AI conversations: stored in PostgreSQL with user_id foreign key; users can delete conversation history
 - Voice audio: processed in real-time, not stored (transcribed text is stored as part of conversation)
 - GDPR/privacy: data export and account deletion endpoints in the API
 - No data sold to third parties

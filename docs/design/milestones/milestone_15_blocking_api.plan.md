@@ -30,7 +30,7 @@ Milestones 12 (Lambda & API Gateway), 14 (User & Auth API)
 6. **POST /blocking/sessions**: Log completed focus session (profile_id, start_time, end_time, override_attempts, completed)
 7. **GET /blocking/sessions**: List sessions with optional date range filter
 8. **GET /blocking/stats**: Aggregated stats (total focus time today/week/month, average session length, completion rate, most blocked apps)
-9. **Storage**: DynamoDB BlockingProfiles and BlockingSessions tables
+9. **Storage**: PostgreSQL blocking_profiles and blocking_sessions tables (via SQLAlchemy)
 10. **Input validation**: Schedule must have valid days/times, blocked_apps is array of app bundle identifiers or category tokens
 
 ## Testing
@@ -38,6 +38,13 @@ Milestones 12 (Lambda & API Gateway), 14 (User & Auth API)
 - Session logging creates records
 - Stats endpoint returns correct aggregations
 - Authorization ensures users can only access their own data
+
+## Test Requirements (Definition of Done)
+- pytest tests for full CRUD lifecycle on /blocking/profiles (create, list, get, update, delete)
+- pytest tests for POST /blocking/sessions logging and GET with date range filter
+- pytest tests for /blocking/stats aggregation accuracy
+- pytest tests for auth middleware (reject unauthenticated, reject cross-user access)
+- pytest tests for input validation (invalid schedule, empty blocked_apps)
 
 ## Notes
 - **Duration**: 2 days

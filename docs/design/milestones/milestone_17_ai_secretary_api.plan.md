@@ -52,5 +52,12 @@ Milestones 13 (AI & Voice Services), 14 (User & Auth API), 16 (Calendar API)
 - Token budgeting enforces limits
 - Conversation history is maintained
 
+## Test Requirements (Definition of Done)
+- pytest tests for action JSON parsing from AI response (valid actions, malformed, unsupported action types)
+- pytest tests for context building (conversation history truncation, schedule inclusion, token budget)
+- pytest tests for token budgeting and free-tier limit enforcement (10 queries/day, reset logic)
+- pytest tests for conversation threading (history maintained across turns, pagination)
+- pytest tests for action confirm/reject endpoints and side-effect execution
+
 ## Notes
 - **Duration**: 4 days

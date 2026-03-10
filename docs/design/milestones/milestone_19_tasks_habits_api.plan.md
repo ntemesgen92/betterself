@@ -13,7 +13,7 @@ Milestones 11 (Database Setup), 12 (Lambda API), 14 (User & Auth API)
 - Implement Tasks API with CRUD and prioritization endpoint
 - Implement Habits API with check-in and streak calculation
 - Add habits summary endpoint
-- Store tasks in Aurora PostgreSQL, habits in DynamoDB
+- Store tasks and habits in PostgreSQL
 
 ## Key Files
 | File | Description |
@@ -46,7 +46,7 @@ Milestones 11 (Database Setup), 12 (Lambda API), 14 (User & Auth API)
 
 5. **GET /habits/summary**: Today's habits due, completion status, longest streaks
 
-6. **Storage**: Tasks in Aurora PostgreSQL (complex queries), habits in DynamoDB (simple key-value with streak counter)
+6. **Storage**: Tasks in PostgreSQL tasks table (with indexes on status, due_date, and priority for filtered queries), habits in PostgreSQL habits table (with streak counter)
 
 ## Testing
 - Task CRUD works
@@ -55,6 +55,13 @@ Milestones 11 (Database Setup), 12 (Lambda API), 14 (User & Auth API)
 - Missed day resets streak
 - Summary endpoint is accurate
 - Filters work correctly
+
+## Test Requirements (Definition of Done)
+- pytest tests for task CRUD and filter combinations (status, priority, date range)
+- pytest tests for prioritization logic (urgency × importance ordering, due-date weighting)
+- pytest tests for streak calculation (consecutive check-ins increment, missed day resets, edge: first check-in)
+- pytest tests for habit check-in idempotency (double check-in same day)
+- pytest tests for /habits/summary accuracy (due today, completion status, longest streak)
 
 ## Notes
 - **Duration**: 2 days

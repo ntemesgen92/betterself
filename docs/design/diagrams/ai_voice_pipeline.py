@@ -10,7 +10,7 @@ Usage:
 import os
 from diagrams import Diagram, Cluster, Edge
 from diagrams.aws.compute import Lambda
-from diagrams.aws.database import Dynamodb, Aurora
+from diagrams.aws.database import RDS
 from diagrams.aws.ml import Transcribe
 from diagrams.aws.storage import S3
 from diagrams.generic.device import Mobile
@@ -57,13 +57,13 @@ with Diagram(
         action_parser = Lambda("Action Parser\n(JSON Extraction)")
 
     with Cluster("Action Execution", graph_attr={"style": "rounded", "bgcolor": "#FBE9E7"}):
-        calendar_action = Aurora("Create/Update\nCalendar Event")
-        task_action = Aurora("Create/Update\nTask")
-        blocking_action = Dynamodb("Update Blocking\nProfile")
+        calendar_action = RDS("Create/Update\nCalendar Event")
+        task_action = RDS("Create/Update\nTask")
+        blocking_action = RDS("Update Blocking\nProfile")
         briefing_action = Lambda("Generate\nDaily Briefing")
 
     with Cluster("Conversation Storage", graph_attr={"style": "rounded", "bgcolor": "#E0F2F1"}):
-        conversation_db = Dynamodb("DynamoDB\nAI Conversations\n(TTL: 90 days)")
+        conversation_db = RDS("PostgreSQL\nAI Conversations")
 
     # Free tier flow
     mic >> Edge(label="1. Record\nAudio", color="purple") >> apple_speech
