@@ -14,10 +14,10 @@
 
 Both developers get hands-on experience across ALL layers of the stack:
 
-- **Dev A** does iOS UI + AI prompt engineering + PM artifacts + basic AWS tasks (S3, DynamoDB CRUD, CloudWatch monitoring)
+- **Dev A** does iOS UI + AI prompt engineering + PM artifacts + basic AWS tasks (S3, basic SQL queries via pgAdmin, CloudWatch monitoring)
 - **Dev B** does AWS infra + backend APIs + AI/ML integration (Bedrock, Transcribe, Polly) + iOS features (widgets, Siri, Live Activities)
 - **AWS complexity guide for Dev A:**
-  - Suitable: S3 (file storage), DynamoDB (read/write items), CloudWatch (view logs/metrics), Cognito (understand auth flow), Pinpoint (analytics config)
+  - Suitable: S3 (file storage), RDS/PostgreSQL (run SELECT/INSERT queries via pgAdmin or psql), CloudWatch (view logs/metrics), Cognito (understand auth flow), Pinpoint (analytics config)
   - Too complex for now: VPC/networking, security groups, CDK, IAM policies, Lambda deployment config -- Dev B owns these
 
 ---
@@ -85,7 +85,7 @@ The goal: produce tangible artifacts and hands-on experience Dev A can speak to 
 |------|---------------------|-------------|
 | Write and iterate AI secretary system prompt | "Translate technical concepts into clear product requirements" | `docs/product/ai_prompts.md` + tested prompts |
 | Write AI gatekeeper prompt and test scenarios | "Translate technical concepts" + Responsible AI | Test results documented |
-| Basic AWS hands-on: S3, DynamoDB, CloudWatch | "Understanding of AI, ML, or data lifecycle concepts" (infra context) | Hands-on experience to discuss |
+| Basic AWS hands-on: S3, RDS/PostgreSQL, CloudWatch | "Understanding of AI, ML, or data lifecycle concepts" (infra context) | Hands-on experience to discuss |
 
 **AI Prompt Engineering:**
 - Write the system prompt for the AI secretary (define persona, capabilities, response format, action JSON structure)
@@ -97,7 +97,7 @@ The goal: produce tangible artifacts and hands-on experience Dev A can speak to 
 
 **Basic AWS Hands-On (Dev B helps set up, Dev A operates):**
 - Upload a file to S3, generate a presigned URL, download it
-- Write an item to DynamoDB, read it back, update it, delete it (basic CRUD)
+- Connect to PostgreSQL via pgAdmin or psql, run basic SELECT/INSERT/UPDATE/DELETE queries
 - Look at CloudWatch logs from Lambda, understand log groups and metrics
 - Navigate the Cognito console, understand user pools and tokens conceptually
 
@@ -127,9 +127,9 @@ While Dev A focuses on PM artifacts, Dev B starts building the foundation.
 | 1 | **Phase 0 Actions** | Submit Google OAuth consent screen for verification. Apply for FamilyControls entitlement. Set up `develop` branch + CI. |
 | 1-3 | M9: CDK Foundation | VPC, subnets, security groups, base stacks |
 | 3-5 | M10: Auth Infra | Cognito user pool, identity providers |
-| 5-7 | M11: Database Setup | DynamoDB tables + GSIs (Aurora deferred to post-MVP) |
+| 5-7 | M11: Database Setup | RDS PostgreSQL instance, RDS Proxy, Secrets Manager, Alembic migrations |
 | 7-9 | M12: Lambda + API Gateway | FastAPI project, Mangum, health check |
-| 9-11 | Help Dev A with AWS hands-on | Set up S3 bucket and DynamoDB table for Dev A to practice with. Pair on prompt testing via Bedrock console. |
+| 9-11 | Help Dev A with AWS hands-on | Set up S3 bucket for Dev A to practice with. Walk through RDS/PostgreSQL basics. Pair on prompt testing via Bedrock console. |
 
 **Sync during this phase:** Daily 15-min standup. Dev B reviews Dev A's PM documents for technical accuracy. Dev A reviews Dev B's CDK code to learn AWS concepts.
 
@@ -186,7 +186,7 @@ After the interview, both devs shift to building the product.
 | 6-7 | M6 | Calendar UI (month/week/day views) | Define calendar UX requirements doc | Solo (standard SwiftUI) |
 | 7 | M7 | Calendar integration (EventKit + Google) | Learn REST API integration, OAuth concepts | **Dev B pairs on Google OAuth** (complex auth flow) |
 | 7-8 | M8 | AI chat (continued) -- action confirmations, conversation history | Own the AI conversation UX, test prompt quality | Solo |
-| 7-8 | -- | Basic AWS: Write blocking session data to DynamoDB via a simple Python script | Hands-on data pipeline experience | Dev B sets up table |
+| 7-8 | -- | Basic AWS: Query blocking session data in PostgreSQL via psql or a simple Python script | Hands-on data pipeline experience | Dev B sets up connection |
 
 > **Note for Dev A:** M7 calendar integration involves EventKit (manageable) + Google Calendar OAuth (complex). Dev B should pair on the Google OAuth implementation specifically -- this involves token refresh logic, scope management, and error handling that benefits from backend experience.
 
@@ -319,14 +319,14 @@ Entry-level AWS tasks throughout the project (with Dev B's guidance):
 | Task | AWS Service | Complexity | When |
 |------|------------|------------|------|
 | Upload/download files, generate presigned URL | S3 | Beginner | Pre-interview (Days 5-8) |
-| Write/read/update items in a table | DynamoDB | Beginner | Pre-interview (Days 5-8) |
+| Run basic SQL queries (SELECT, INSERT, UPDATE) | RDS/PostgreSQL | Beginner | Pre-interview (Days 5-8) |
 | View Lambda logs, understand log groups | CloudWatch | Beginner | Weeks 5-6 |
 | Understand user pools, tokens, auth flow | Cognito | Conceptual | Weeks 3-4 |
 | Configure event tracking from iOS | Pinpoint | Beginner | Weeks 9-10 |
 | View API Gateway request logs | CloudWatch | Beginner | Weeks 8-9 |
 | Navigate the AWS Console, understand regions/services | General | Beginner | Throughout |
 
-**Not for Dev A (too complex):** VPC configuration, security groups, CDK/IaC, IAM policies, Lambda deployment, NAT gateways, DynamoDB GSI design
+**Not for Dev A (too complex):** VPC configuration, security groups, CDK/IaC, IAM policies, Lambda deployment, NAT gateways, RDS Proxy configuration, Alembic migration authoring
 
 ---
 

@@ -13,7 +13,7 @@ Milestones 11 (Database Setup), 12 (Lambda API), 14 (User & Auth API)
 - Implement Tasks API with CRUD and prioritization endpoint
 - Implement Habits API with check-in and streak calculation
 - Add habits summary endpoint
-- Store tasks and habits in DynamoDB
+- Store tasks and habits in PostgreSQL
 
 ## Key Files
 | File | Description |
@@ -46,7 +46,7 @@ Milestones 11 (Database Setup), 12 (Lambda API), 14 (User & Auth API)
 
 5. **GET /habits/summary**: Today's habits due, completion status, longest streaks
 
-6. **Storage**: Tasks in DynamoDB Tasks table (with status-due-index and priority-index GSIs for filtered queries), habits in DynamoDB Habits table (with streak counter)
+6. **Storage**: Tasks in PostgreSQL tasks table (with indexes on status, due_date, and priority for filtered queries), habits in PostgreSQL habits table (with streak counter)
 
 ## Testing
 - Task CRUD works

@@ -10,7 +10,7 @@ Usage:
 import os
 from diagrams import Diagram, Cluster, Edge
 from diagrams.aws.compute import Lambda
-from diagrams.aws.database import Dynamodb
+from diagrams.aws.database import RDS, RDSInstance
 from diagrams.aws.network import APIGateway, VPC, PublicSubnet, PrivateSubnet, NATGateway, InternetGateway, Route53
 from diagrams.aws.security import Cognito, WAF, SecretsManager
 from diagrams.aws.storage import S3
@@ -54,16 +54,19 @@ with Diagram(
             priv_a = PrivateSubnet("Private A\n10.0.3.0/24\nus-east-1a")
             priv_b = PrivateSubnet("Private B\n10.0.4.0/24\nus-east-1b")
 
-            with Cluster("Lambda Security Group\n(Outbound: 443 to Internet + DynamoDB VPC Endpoint)", graph_attr={"style": "dashed", "bgcolor": "#FFF9C4", "pencolor": "#F57F17"}):
+            with Cluster("Lambda Security Group\n(Outbound: 5432 to Proxy SG + 443 to Internet)", graph_attr={"style": "dashed", "bgcolor": "#FFF9C4", "pencolor": "#F57F17"}):
                 lambda_fn = Lambda("FastAPI Lambda\n(Python 3.12)\n256 MB / 30s timeout")
 
-    with Cluster("VPC Endpoints (Gateway)", graph_attr={"style": "rounded", "bgcolor": "#F3E5F5"}):
-        dynamodb = Dynamodb("DynamoDB\n(VPC Endpoint)\nCalendar + Tasks + Habits\n+ Users + Sessions\n+ Conversations")
+            with Cluster("RDS Proxy Security Group\n(Inbound: 5432 from Lambda SG, Outbound: 5432 to RDS SG)", graph_attr={"style": "dashed", "bgcolor": "#E1BEE7", "pencolor": "#6A1B9A"}):
+                rds_proxy = RDS("RDS Proxy\n(Connection Pooler)")
+
+            with Cluster("RDS Security Group\n(Inbound: 5432 from Proxy SG only)", graph_attr={"style": "dashed", "bgcolor": "#C5CAE9", "pencolor": "#283593"}):
+                rds = RDSInstance("RDS PostgreSQL 15\n(db.t3.micro Free Tier)\nAll Application Tables")
 
     with Cluster("Regional Services", graph_attr={"style": "rounded", "bgcolor": "#E8F0FE"}):
         cognito = Cognito("Cognito\nUser Pool")
         s3 = S3("S3 Buckets")
-        secrets = SecretsManager("Secrets\nManager")
+        secrets = SecretsManager("Secrets\nManager\n(DB Creds)")
         logs = Cloudwatch("CloudWatch\nLogs")
 
     internet >> igw
@@ -71,7 +74,8 @@ with Diagram(
     waf >> api_gw
     api_gw >> Edge(label="JWT\nValidation") >> cognito
     api_gw >> Edge(label="Invoke") >> lambda_fn
-    lambda_fn >> Edge(label="VPC Endpoint", color="orange") >> dynamodb
+    lambda_fn >> Edge(label="TCP 5432\n(Pooled)", color="blue") >> rds_proxy
+    rds_proxy >> Edge(label="TCP 5432", color="blue") >> rds
     lambda_fn >> Edge(label="HTTPS", style="dashed", color="gray") >> s3
     lambda_fn >> Edge(label="DB Creds", style="dashed", color="gray") >> secrets
     lambda_fn >> Edge(label="Logs", style="dashed", color="gray") >> logs

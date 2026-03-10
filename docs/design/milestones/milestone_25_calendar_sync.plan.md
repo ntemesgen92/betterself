@@ -37,7 +37,7 @@ Implement two-way calendar sync between the iOS app, backend cloud storage, and 
    - c) Reconcile with EventKit events
    - d) Push any local-only changes to backend (POST /calendar/sync)
 
-3. **AI-created events**: When AI creates an event via backend, it's stored in DynamoDB. On next sync, it appears in the app AND is written to the user's chosen calendar (Apple or Google) via EventKit or Google Calendar API.
+3. **AI-created events**: When AI creates an event via backend, it's stored in PostgreSQL. On next sync, it appears in the app AND is written to the user's chosen calendar (Apple or Google) via EventKit or Google Calendar API.
 
 4. **Conflict resolution strategy**: For same event modified in multiple places, use last-modified timestamp. If timestamps are within 1 minute, prompt user to choose version.
 

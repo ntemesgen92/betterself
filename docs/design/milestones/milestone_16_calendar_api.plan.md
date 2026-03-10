@@ -4,7 +4,7 @@
 Not Started
 
 ## Goal
-Implement calendar event CRUD, external calendar sync management, and AI-created event handling. Events stored in DynamoDB with GSIs for date-range queries, with support for recurrence, conflict detection, and AI-powered schedule optimization.
+Implement calendar event CRUD, external calendar sync management, and AI-created event handling. Events stored in PostgreSQL with indexes for date-range queries, with support for recurrence, conflict detection, and AI-powered schedule optimization.
 
 ## Dependencies
 Milestones 11 (Database Setup), 12 (Lambda & API Gateway), 14 (User & Auth API)
@@ -31,7 +31,7 @@ Milestones 11 (Database Setup), 12 (Lambda & API Gateway), 14 (User & Auth API)
 6. **POST /calendar/sync**: Trigger sync from iOS (receives batch of local calendar events, merges with cloud state)
 7. **GET /calendar/conflicts**: Detect scheduling conflicts in date range
 8. **POST /calendar/optimize**: AI-powered schedule optimization (calls Bedrock to analyze schedule and suggest improvements), returns list of proposed changes
-9. **Storage**: DynamoDB CalendarEvents table with user_date-index GSI for date-range queries
+9. **Storage**: PostgreSQL calendar_events table with composite index on (user_id, start_time) for date-range queries
 10. **Recurrence**: Store RRULE-compatible recurrence rules, expand occurrences on read
 11. **AI events**: Flag ai_created=true and link to AI conversation that created them
 

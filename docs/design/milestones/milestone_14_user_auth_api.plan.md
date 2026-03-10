@@ -4,7 +4,7 @@
 Not Started
 
 ## Goal
-Implement user registration, login, profile management, and subscription status endpoints. Auth middleware validates Cognito JWT tokens and user records are stored in DynamoDB.
+Implement user registration, login, profile management, and subscription status endpoints. Auth middleware validates Cognito JWT tokens and user records are stored in PostgreSQL.
 
 ## Dependencies
 Milestones 10 (Auth Infrastructure), 12 (Lambda & API Gateway)
@@ -25,17 +25,17 @@ Milestones 10 (Auth Infrastructure), 12 (Lambda & API Gateway)
 
 ## Implementation Details
 1. **Auth middleware**: Extract and validate Cognito JWT from Authorization header, decode user claims (sub, email, custom attributes)
-2. **POST /auth/register**: Create user record in DynamoDB after Cognito signup confirmation (webhook or post-confirmation Lambda trigger)
-3. **GET /users/me**: Return current user profile from DynamoDB
+2. **POST /auth/register**: Create user record in PostgreSQL after Cognito signup confirmation (webhook or post-confirmation Lambda trigger)
+3. **GET /users/me**: Return current user profile from PostgreSQL
 4. **PUT /users/me**: Update user profile (name, preferences)
 5. **PUT /users/me/preferences**: Update AI preferences, notification settings, calendar connections
 6. **GET /users/me/subscription**: Return subscription tier and usage stats (AI queries remaining today)
-7. **DELETE /users/me**: Account deletion (GDPR compliance) - removes all DynamoDB records across tables, triggers Cognito user deletion
+7. **DELETE /users/me**: Account deletion (GDPR compliance) - removes all PostgreSQL records across tables, triggers Cognito user deletion
 8. **Pydantic models**: Request/response validation
-9. **Cognito trigger**: Post-confirmation Lambda trigger to auto-create DynamoDB user record
+9. **Cognito trigger**: Post-confirmation Lambda trigger to auto-create PostgreSQL user record
 
 ## Testing
-- Registration creates user in DynamoDB
+- Registration creates user in PostgreSQL
 - JWT auth middleware rejects invalid tokens
 - Profile CRUD works
 - Account deletion removes all user data
@@ -50,3 +50,4 @@ Milestones 10 (Auth Infrastructure), 12 (Lambda & API Gateway)
 
 ## Notes
 - **Duration**: 2 days
+- Storage layer uses SQLAlchemy models with asyncpg via RDS Proxy, not boto3/DynamoDB
